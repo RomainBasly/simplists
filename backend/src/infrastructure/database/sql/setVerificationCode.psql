@@ -1,0 +1,40 @@
+CREATE OR REPLACE FUNCTION set_verification_code_into_DB(
+    email_address text, 
+    verification_code varchar, 
+    formatted_expiry_date timestamptz
+)
+RETURNS void AS $$
+
+DECLARE 
+    new_user_id bigint; 
+    email_exists boolean;
+    existing_user_id bigint; 
+    is_already_verified boolean;
+BEGIN
+    SELECT EXISTS(SELECT 1 FROM public."app-users" WHERE email = email_address) INTO email_exists;
+
+    IF NOT email_exists THEN
+        INSERT INTO public."app-users" (email, is_email_verified)
+        VALUES (email_address, false)
+        RETURNING user_id INTO new_user_id;
+
+        INSERT INTO public."app-email-verification-token" (user_id, code, expiry_date)
+        VALUES (new_user_id, verification_code, formatted_expiry_date);
+    ELSE
+        SELECT user_id INTO existing_user_id FROM public."app-users" WHERE email = email_address;
+        SELECT is_email_verified INTO is_already_verified FROM public."app-users" WHERE user_id = existing_user_id;
+
+        IF NOT is_already_verified THEN
+            UPDATE public."app-email-verification-token"
+            SET code = verification_code, expiry_date = formatted_expiry_date
+            WHERE user_id = existing_user_id;
+        ELSE
+            RAISE EXCEPTION 'Email % is already verified', email_address;
+        END IF;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- This ROLLBACK is implicit and will undo changes made in the current transaction (function)
+        RAISE;
+END;
+$$ LANGUAGE plpgsql;
