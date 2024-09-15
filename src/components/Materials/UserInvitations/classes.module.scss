@@ -1,0 +1,46 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+  margin-top: 20px;
+
+  .pending-invitations-section {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+
+    .no-invitation {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      border: 1px solid #a7bed3;
+      border-radius: 8px;
+      padding: 25px;
+      gap: 8px;
+      background-color: #c6e2e9;
+
+      .svg {
+        display: flex;
+        align-items: center;
+        width: 20px;
+      }
+
+      .text-content {
+        font-size: 12px;
+        font-style: italic;
+        font-family: "Merriweather", sans-serif;
+        color: #353535;
+      }
+    }
+  }
+
+  .refused-invitation-section {
+    display: flex;
+    gap: 10px;
+
+    .refused-invitation-container {
+      display: flex;
+    }
+  }
+}

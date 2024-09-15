@@ -1,0 +1,186 @@
+.add-element {
+  visibility: hidden;
+  width: 100%;
+  gap: 10px;
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+  position: absolute;
+  left: 0;
+  opacity: 0;
+  transform: translateX(100%);
+  margin-top: 50px;
+
+  @media screen and (max-width: 500px) {
+    gap: 2px;
+  }
+
+  &.is-form-visible {
+    display: flex;
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0);
+    flex-direction: column;
+
+    .content {
+      display: flex;
+
+      .dynamic-input {
+        flex: 1;
+        gap: 10px;
+        width: 100%;
+        background-color: #efe9ae;
+        align-items: center;
+        padding: 15px 20px;
+        border: 1px solid #333533;
+        outline: 1px solid #333533;
+        font-size: 16px;
+
+        &.error-form {
+          border: 1px solid #950e0e;
+          outline: 1px solid #950e0e;
+          background-color: #fec5bb;
+        }
+
+        @media screen and (max-width: 320px) {
+          padding: 5px 20px;
+        }
+
+        input::placeholder {
+          color: #333533;
+          font-size: 12px;
+        }
+
+        input:focus,
+        input:active,
+        input:focus-visible,
+        input:focus-within {
+          outline: 2px solid #333533;
+        }
+      }
+      .svg {
+        display: flex;
+        align-items: center;
+        width: 30px;
+        cursor: pointer;
+
+        svg {
+          width: 100%;
+        }
+      }
+    }
+
+    .error-container {
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      max-height: 40px;
+      height: 100%;
+      width: 100%;
+      padding-top: 20px;
+
+      .error {
+        display: inline-block;
+        color: orange;
+        font-size: 13px;
+        max-width: 400px;
+        white-space: normal;
+        overflow: hidden;
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: row;
+    .svg {
+      width: 20px;
+    }
+  }
+}
+
+.edit-element {
+  visibility: hidden;
+  width: 100%;
+  gap: 10px;
+  flex-direction: column;
+
+  @media screen and (max-width: 500px) {
+    gap: 2px;
+  }
+
+  &.is-form-visible {
+    display: flex;
+    visibility: visible;
+
+    .content {
+      display: flex;
+
+      .dynamic-input {
+        flex: 1;
+        gap: 10px;
+        width: 100%;
+        background-color: transparent;
+        align-items: center;
+        padding: 10px 20px;
+        border: 0.5px solid #333533;
+        outline: 0.5px solid #333533;
+        font-size: 16px;
+
+        &.error-form {
+          border: 1px solid #950e0e;
+          outline: 1px solid #950e0e;
+          background-color: #fec5bb;
+        }
+
+        @media screen and (max-width: 320px) {
+          padding: 5px 20px;
+        }
+
+        input::placeholder {
+          color: #333533;
+          font-size: 12px;
+        }
+
+        input:focus,
+        input:active,
+        input:focus-visible,
+        input:focus-within {
+          outline: 2px solid #333533;
+        }
+      }
+      .svg {
+        display: flex;
+        align-items: center;
+        width: 30px;
+        cursor: pointer;
+
+        svg {
+          width: 100%;
+        }
+      }
+    }
+
+    .error-container {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+
+      .error {
+        display: inline-block;
+        color: #950e0e;
+        font-size: 13px;
+        max-width: 400px;
+        white-space: normal;
+        overflow: hidden;
+      }
+    }
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  .svg {
+    width: 20px;
+  }
+}
