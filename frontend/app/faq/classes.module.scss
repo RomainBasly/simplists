@@ -1,0 +1,70 @@
+.root {
+  display: flex;
+  height: 100vh;
+  min-height: 600px;
+  flex-direction: column;
+  min-width: 600px;
+  justify-content: center;
+  align-items: center;
+
+  @media screen and (max-width: 500px) {
+    min-width: 390px;
+  }
+  @media screen and (max-width: 400px) {
+    min-width: 350px;
+    justify-content: flex-start;
+  }
+  @media screen and (max-width: 360px) {
+    min-width: 320px;
+    justify-content: flex-start;
+  }
+  @media screen and (max-width: 320px) {
+    min-width: 300px;
+    justify-content: flex-start;
+  }
+
+  .top {
+    @media screen and (max-width: 400px) {
+      margin-top: 60px;
+    }
+    @media screen and (max-width: 320px) {
+      margin-top: unset;
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    min-width: 500px;
+    max-width: 600px;
+    border-radius: 10px;
+    border: 1px solid #4f5d75;
+    gap: 20px;
+    background-color: #f5f3f4;
+    padding: 40px 15px;
+    margin: 10px;
+    justify-content: flex-start;
+
+    @media screen and (max-width: 500px) {
+      min-width: 400px;
+      max-width: 450px;
+    }
+    @media screen and (max-width: 400px) {
+      min-width: 360px;
+      max-width: 380px;
+    }
+    @media screen and (max-width: 360px) {
+      min-width: 340px;
+      max-width: 340px;
+    }
+    @media screen and (max-width: 320px) {
+      min-width: 280px;
+      max-width: 280px;
+    }
+
+    .title,
+    .subtitle {
+      text-align: center;
+    }
+  }
+}

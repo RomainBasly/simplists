@@ -1,0 +1,68 @@
+.root {
+  display: flex;
+  border: 1px solid grey;
+  width: 100%;
+  //max-width: 400px;
+  height: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  flex-direction: column;
+
+  @media screen and (max-width: 420px) {
+    max-width: 380px;
+  }
+  @media screen and (max-width: 400px) {
+    max-width: 360px;
+  }
+  @media screen and (max-width: 360px) {
+    max-width: 320px;
+  }
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 10px 10px;
+    width: 100%;
+
+    .icon {
+      display: flex;
+      cursor: pointer;
+      svg {
+        width: 15px;
+        color: grey;
+      }
+    }
+
+    .thematic {
+      border: 1px solid #a7bed3;
+      background-color: #6096ba;
+      border-radius: 20px;
+      padding: 2px 16px;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: white;
+    }
+  }
+  .title {
+    display: flex;
+    text-transform: uppercase;
+    width: 100%;
+    font-weight: 600;
+    font-size: 24px;
+
+    @media screen and (max-width: 460px) {
+      font-size: 20px;
+    }
+  }
+
+  .shared-with {
+    color: #6c757d;
+    font-size: 12px;
+    font-style: italic;
+
+    @media screen and (max-width: 460px) {
+      font-size: 10px;
+    }
+  }
+}

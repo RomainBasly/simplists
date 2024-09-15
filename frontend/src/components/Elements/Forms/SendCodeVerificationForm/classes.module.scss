@@ -1,0 +1,115 @@
+.root {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    //height: 100%;
+    min-width: 500px;
+    max-width: 500px;
+    border-radius: 10px;
+    border: 1px solid #2a5293;
+    gap: 40px;
+    background-color: white;
+    padding: 40px 15px;
+    margin: 10px;
+    justify-content: space-around;
+
+    @media screen and (max-width: 500px) {
+      min-width: 390px;
+    }
+    @media screen and (max-width: 400px) {
+      min-width: 350px;
+    }
+    @media screen and (max-width: 360px) {
+      min-width: 320px;
+    }
+    @media screen and (max-width: 320px) {
+      min-width: 300px;
+    }
+
+    .top {
+      display: flex;
+      gap: 5px;
+      border: 1px solid #034078;
+      padding: 5px;
+      border-radius: 4px;
+      color: #343a40;
+      background-color: #f8f9fa;
+
+      .icon {
+        display: flex;
+        align-items: center;
+        width: 20px;
+      }
+
+      .text-container {
+        font-family: "Geologica", sans-serif;
+        font-size: 13px;
+        span {
+          font-weight: 700;
+          color: #2a5293;
+        }
+      }
+    }
+
+    .email-icon {
+      display: flex;
+      width: 20px;
+    }
+
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .title {
+        font-size: 26px;
+        font-family: "Geologica", sans-serif;
+        font-weight: 800;
+      }
+      .input {
+        border-radius: 4px;
+        border: 1px solid grey;
+        padding: 10px;
+
+        &:focus {
+          outline: none;
+          border: 1px solid #ffb600;
+          background-color: #efe9ae;
+        }
+
+        &::placeholder {
+          color: #6c757d;
+        }
+      }
+
+      .error {
+        color: #950e0e;
+        font-size: 13px;
+      }
+    }
+
+    .buttons-container {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+
+      .connexion-button {
+        padding: 8px;
+        background-color: #ffcb77;
+        border: 1px solid #fec89a;
+        cursor: pointer;
+        user-select: none;
+      }
+    }
+
+    .subtitle {
+      text-align: center;
+    }
+  }
+}

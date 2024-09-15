@@ -1,0 +1,54 @@
+.root {
+  display: flex;
+  width: 100%;
+  position: relative;
+  align-items: center;
+  margin-top: 30px;
+
+  .dynamic-button,
+  .form {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .dynamic-button {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    background: transparent;
+    align-items: center;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid #333533;
+    outline: 1px solid #333533;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out,
+      background-color 0.4s ease-in-out;
+    position: absolute;
+    left: 0;
+    transform: translateX(0);
+    background-color: #eaf2d7;
+
+    @media screen and (max-width: 320px) {
+      padding: 2px 20px;
+    }
+
+    &:hover {
+      background-color: #c9e4de;
+    }
+
+    .svg {
+      display: flex;
+      align-items: center;
+      width: 30px;
+
+      svg {
+        width: 100%;
+      }
+    }
+
+    &.is-button-invisible {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-100%);
+    }
+  }
+}

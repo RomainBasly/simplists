@@ -1,0 +1,8 @@
+{
+  "files.autoSave": "afterDelay",
+  "css.format.enable": true,
+  "intelephense.format.enable": true,
+  "search.useIgnoreFiles": true,
+  "search.useParentIgnoreFiles": false,
+  "search.useGlobalIgnoreFiles": false
+}

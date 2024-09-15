@@ -1,0 +1,4 @@
+This is a Brave Creators publisher verification file.
+
+Domain: data-list-collaborative.vercel.app
+Token: bcba9a37d0c805b8a1c71206aff972207cc91fff1b1c556154fa2608a96ef166
