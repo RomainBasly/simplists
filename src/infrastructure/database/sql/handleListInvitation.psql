@@ -1,0 +1,19 @@
+CREATE OR REPLACE FUNCTION handle_list_invitation(invitation_id INT, user_id INT, app_list_id UUID, invitation_status INT)
+RETURNS VOID AS $$
+BEGIN
+    -- Update the status of the invitation
+    UPDATE "app-list-invitations"
+    SET status = invitation_status
+    WHERE id = invitation_id;
+
+    -- Only insert a new beneficiary if the status is 2
+    IF invitation_status = 2 THEN
+        INSERT INTO "app-list-beneficiaries" ("user-id", "app-list-id")
+        VALUES (user_id, app_list_id);
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE;
+END;
+$$ LANGUAGE plpgsql;
