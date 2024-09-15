@@ -1,0 +1,65 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .form-element {
+    display: flex;
+    flex-direction: column;
+
+    .input {
+      background-color: transparent;
+      border-radius: 4px;
+      padding: 10px;
+      border: 1px solid grey;
+
+      &:focus {
+        outline: none;
+        border: 1px solid #ffb600;
+        background-color: #efe9ae;
+      }
+
+      &::placeholder {
+        color: #6c757d;
+      }
+    }
+
+    .error {
+      color: #950e0e;
+      font-size: 13px;
+    }
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+
+    .connexion-button {
+      padding: 8px;
+      background-color: #ffcb77;
+      border: 1px solid #fec89a;
+      cursor: pointer;
+    }
+
+    .registration-button-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .registration-button {
+        display: flex;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+        font-style: italic;
+        background-color: inherit;
+      }
+    }
+    .error {
+      color: #950e0e;
+      font-size: 13px;
+    }
+  }
+}

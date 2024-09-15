@@ -1,0 +1,29 @@
+.root {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid gray;
+  padding: 5px 10px;
+  border-radius: 4px;
+
+  &.is-focused {
+    border: 1px solid #ffb600;
+    background-color: #efe9ae;
+  }
+
+  .input-element {
+    width: 100%;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    padding: 5px 0px 5px;
+
+    &::placeholder {
+      color: #6c757d;
+    }
+  }
+
+  .icon {
+    width: 20px;
+    color: #6c757d;
+  }
+}

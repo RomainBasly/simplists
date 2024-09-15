@@ -1,0 +1,15 @@
+.root {
+  .title {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 75px;
+    width: 200px;
+    margin: 0 auto;
+  }
+}
