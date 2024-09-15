@@ -1,0 +1,244 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .form-element {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .input-section {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      gap: 4px;
+      flex-direction: column;
+
+      .label {
+        align-self: flex-start;
+        font-weight: bold;
+        line-height: 1.2;
+      }
+
+      .error {
+        display: flex;
+        align-self: flex-start;
+      }
+
+      .input-container {
+        display: flex;
+        width: 100%;
+        gap: 4px;
+        flex-direction: column;
+
+        &.input-container-row {
+          flex-direction: row;
+          align-items: center;
+        }
+
+        .input {
+          background-color: transparent;
+          border-radius: 4px;
+          padding: 10px;
+          border: 1px solid grey;
+          width: 100%;
+
+          &:focus {
+            outline: none;
+            border: 1px solid #ffb600;
+            background-color: #efe9ae;
+          }
+
+          &::placeholder {
+            color: #6c757d;
+          }
+        }
+      }
+
+      .plus-icon {
+        max-height: 25px;
+        height: 100%;
+        cursor: pointer;
+        color: #34a0a4;
+      }
+    }
+
+    .error {
+      color: #950e0e;
+      font-size: 13px;
+    }
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    background-color: #efefef;
+    padding-top: 6px;
+
+    .submit-button {
+      padding: 8px;
+      background-color: #ffcb77;
+      border: 1px solid #fec89a;
+      cursor: pointer;
+    }
+
+    .erase-button {
+      padding: 8px;
+      border: 1px solid #950e0e;
+      color: #950e0e;
+      cursor: pointer;
+      background-color: transparent;
+    }
+
+    .error {
+      color: #950e0e;
+      font-size: 13px;
+    }
+  }
+
+  .emails-section {
+    display: flex;
+    flex-direction: column;
+    animation: collapseContent 0.1s ease-out forwards;
+    border-radius: 8px;
+    padding: 10px 0px;
+
+    &.email-section-visible {
+      animation: expandContent 0.5s ease-out forwards;
+      gap: 25px;
+    }
+
+    .emails-container {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+
+      .section {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        overflow-y: auto;
+        max-height: 300px;
+
+        .title-email {
+          display: flex;
+          align-items: center;
+          padding: 10px;
+          font-weight: bold;
+          line-height: 1.2;
+          background-color: #284b63;
+          border-radius: 8px;
+          color: white;
+        }
+        .nobody {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #6c757d;
+
+          .icon {
+            width: 20px;
+          }
+          .text {
+            font-size: 14px;
+            font-style: italic;
+          }
+        }
+        .email-element {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+
+          &.email-invisible {
+            animation: fadeOutEmail 0.5s ease-out;
+          }
+
+          .email-text {
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            // font-family: "Roboto Mono", sans-serif;
+            font-weight: 400;
+
+            @media screen and (max-width: 500px) {
+              font-size: 12px;
+            }
+          }
+
+          .email-picto {
+            display: flex;
+            width: 25px;
+
+            @media screen and (max-width: 500px) {
+              align-self: center;
+              width: 20px;
+            }
+
+            svg {
+              width: 100%;
+            }
+
+            .chevron-icon {
+              display: flex;
+              border: 1px solid #2a5293;
+              background-color: #2a5293;
+              color: #efefef;
+              border-radius: 4px;
+
+              svg {
+                width: 100%;
+              }
+            }
+
+            .minus-icon {
+              cursor: pointer;
+              width: 25px;
+              color: #c1121f;
+            }
+          }
+        }
+      }
+
+      @keyframes fadeOutEmail {
+        0% {
+          opacity: 1;
+          max-height: 50px;
+        }
+        100% {
+          opacity: 0;
+          max-height: 0;
+        }
+      }
+    }
+  }
+
+  @keyframes expandContent {
+    0% {
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0px;
+    }
+    100% {
+      opacity: 1;
+      visibility: visible;
+      max-height: 500px;
+    }
+  }
+
+  @keyframes collapseContent {
+    0% {
+      opacity: 1;
+      visibility: visible;
+      max-height: 500px;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0px;
+    }
+  }
+}

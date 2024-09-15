@@ -1,0 +1,112 @@
+{
+"display_override": ["window-controls-overlay"], 
+"protocol_handlers": [{"protocol":"mailto","url":"/newEmail?to=%s"}], 
+"shortcuts": [
+  {
+    "name": "Start Live Session",
+    "short_name": "Start Live",
+    "description": "Jump direction into starting or joining a live session",
+    "url": "/?startLive",
+    "icons": [
+      {
+        "src": "https://pwabuilder.com/assets/icons/icon_192.png",
+        "sizes": "192x192"
+      }
+    ]
+  }
+], 
+"screenshots": [
+  {
+    "src": "https://www.pwabuilder.com/assets/screenshots/screen1.png",
+    "sizes": "2880x1800",
+    "type": "image/png",
+    "description": "PWABuilder Home Screen"
+  },
+  {
+    "src": "https://www.pwabuilder.com/assets/screenshots/screen2.png",
+    "sizes": "2880x1800",
+    "type": "image/png",
+    "description": "PWABuilder Report Card"
+  },
+  {
+    "src": "https://www.pwabuilder.com/assets/screenshots/screen3.png",
+    "sizes": "2880x1800",
+    "type": "image/png",
+    "description": "Manifest information on the Report Card"
+  }
+], 
+  "name": "Simplifiez vos listes",
+  "short_name": "Simplists",
+  "theme_color": "#000000",
+  "background_color": "#efefef",
+  "scope": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "description": "Dématérialisez vos listes, partagez les avec vos proches et soyez sûrs de ne jamais vous faire gronder parce que vous avez oublié la liste de courses!",
+  "lang": "fr",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "images/logos/logo-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logos/logo-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}
