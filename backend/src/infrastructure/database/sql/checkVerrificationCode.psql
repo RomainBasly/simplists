@@ -1,0 +1,19 @@
+CREATE FUNCTION public.get_email_verification_data_from_DB(email_address text)
+
+RETURNS record AS $$
+
+DECLARE
+    existing_user_id bigint;
+    result_record record;
+    
+BEGIN
+    SELECT user_id INTO existing_user_id
+    FROM public."app-users"
+    WHERE email = email_address;
+
+    SELECT * INTO result_record
+    FROM public."app-email-verification-token"
+    WHERE user_id = existing_user_id;
+
+    RETURN result_record;
+END;

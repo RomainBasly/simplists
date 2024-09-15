@@ -1,0 +1,154 @@
+CREATE OR REPLACE FUNCTION public.update_list_and_emails(
+  p_list_id UUID,
+  new_list_name TEXT,
+  new_description TEXT,
+  new_thematic TEXT,
+  new_access_level TEXT,
+  removed_beneficiaries JSONB,
+  added_invited_emails JSONB,
+  removed_invited_emails JSONB,
+  creator_id INT INT;
+) RETURNS void AS $$
+BEGIN
+  DECLARE
+    actual_added_invited_emails JSONB;
+    actual_removed_invited_emails JSONB;
+    actual_removed_beneficiaries JSONB;
+    len_added_invited_emails INT;
+    len_removed_invited_emails INT;
+    len_removed_beneficiaries INT;
+    email_text text;
+    beneficiary_email text;
+    found_user_id bigint;
+BEGIN
+    -- Parse input strings into JSONB arrays
+    BEGIN
+        actual_added_invited_emails := added_invited_emails::jsonb;
+        IF jsonb_typeof(actual_added_invited_emails) != 'array' THEN
+            RAISE EXCEPTION 'Invalid JSON array for added_invited_emails: %', added_invited_emails;
+        END IF;
+    EXCEPTION
+        WHEN others THEN
+            RAISE EXCEPTION 'Invalid JSON for added_invited_emails: %', added_invited_emails;
+    END;
+
+    BEGIN
+        actual_removed_invited_emails := removed_invited_emails::jsonb;
+        IF jsonb_typeof(actual_removed_invited_emails) != 'array' THEN
+            RAISE EXCEPTION 'Invalid JSON array for removed_invited_emails: %', removed_invited_emails;
+        END IF;
+    EXCEPTION
+        WHEN others THEN
+            RAISE EXCEPTION 'Invalid JSON for removed_invited_emails: %', removed_invited_emails;
+    END;
+
+    BEGIN
+        actual_removed_beneficiaries := removed_beneficiaries::jsonb;
+        IF jsonb_typeof(actual_removed_beneficiaries) != 'array' THEN
+            RAISE EXCEPTION 'Invalid JSON array for removed_beneficiaries: %', removed_beneficiaries;
+        END IF;
+    EXCEPTION
+        WHEN others THEN
+            RAISE EXCEPTION 'Invalid JSON for removed_beneficiaries: %', removed_beneficiaries;
+    END;
+
+    -- Log the parsed JSONB values and their types
+    RAISE NOTICE 'Parsed added_invited_emails: %, Type: %', actual_added_invited_emails, jsonb_typeof(actual_added_invited_emails);
+    RAISE NOTICE 'Parsed removed_invited_emails: %, Type: %', actual_removed_invited_emails, jsonb_typeof(actual_removed_invited_emails);
+    RAISE NOTICE 'Parsed removed_beneficiaries: %, Type: %', actual_removed_beneficiaries, jsonb_typeof(actual_removed_beneficiaries);
+
+    len_added_invited_emails := jsonb_array_length(actual_added_invited_emails);
+    len_removed_invited_emails := jsonb_array_length(actual_removed_invited_emails);
+    len_removed_beneficiaries := jsonb_array_length(actual_removed_beneficiaries);
+
+    -- Log processed values
+    RAISE NOTICE 'len_added_invited_emails: %, len_removed_invited_emails: %, len_removed_beneficiaries: %', len_added_invited_emails, len_removed_invited_emails, len_removed_beneficiaries;
+
+    -- Add invited emails if provided
+    IF len_added_invited_emails > 0 THEN
+        FOR email_text IN SELECT jsonb_array_elements_text(actual_added_invited_emails)
+        LOOP
+            -- Check if the email exists in the app-users table
+            RAISE NOTICE 'Processing email: %', email_text;
+            SELECT au.user_id INTO found_user_id
+            FROM public."app-users" au
+            WHERE au.email = email_text;
+
+            -- Insert into app-list-invitations table
+            INSERT INTO public."app-list-invitations" (
+                email,
+                list_id,
+                is_already_active_user,
+                is_already_invited,
+                user_id,
+                status,
+                creator_id
+            )
+            VALUES (
+                email_text,
+                p_list_id,
+                CASE WHEN found_user_id IS NOT NULL THEN TRUE ELSE FALSE END,
+                FALSE, -- Assuming default value for is_already_invited
+                found_user_id,
+                1, -- Assuming default value for status
+                creator_id
+            );
+        END LOOP;
+        RAISE NOTICE 'Added invited emails';
+    ELSE
+        RAISE NOTICE 'No invited emails to add';
+    END IF;
+
+    -- Remove invited emails if provided
+    IF len_removed_invited_emails > 0 THEN
+        RAISE NOTICE 'Removing invited emails';
+        FOR email_text IN SELECT jsonb_array_elements_text(actual_removed_invited_emails)
+        LOOP
+            DELETE FROM public."app-list-invitations"
+            WHERE list_id = p_list_id AND email = email_text;
+        END LOOP;
+        RAISE NOTICE 'Removed invited emails';
+    ELSE
+        RAISE NOTICE 'No invited emails to remove';
+    END IF;
+
+    -- Remove beneficiaries if provided
+    IF len_removed_beneficiaries > 0 THEN
+        RAISE NOTICE 'Removing beneficiaries';
+        FOR beneficiary_email IN SELECT jsonb_array_elements_text(actual_removed_beneficiaries)
+        LOOP
+            -- Check if the beneficiary email exists in the app-users table
+            RAISE NOTICE 'Processing beneficiary email: %', beneficiary_email;
+            SELECT au.user_id INTO found_user_id
+            FROM public."app-users" au
+            WHERE au.email = beneficiary_email;
+
+            IF found_user_id IS NOT NULL THEN
+                DELETE FROM public."app-list-beneficiaries"
+                WHERE "app-list-id" = p_list_id AND "user-id" = found_user_id;
+            END IF;
+        END LOOP;
+        RAISE NOTICE 'Removed beneficiaries';
+    ELSE
+        RAISE NOTICE 'No beneficiaries to remove';
+    END IF;
+
+    -- Update the app-lists table if new values are provided
+    UPDATE public."app-lists"
+    SET
+        "listName" = COALESCE(new_list_name, "listName"),
+        description = COALESCE(new_description, description),
+        thematic = COALESCE(new_thematic, thematic),
+        access_level = COALESCE(new_access_level, access_level),
+        updated_at = now()
+    WHERE id = p_list_id;
+
+    RAISE NOTICE 'Updated app-lists table';
+
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Log the exception
+        RAISE NOTICE 'Exception occurred: %', SQLERRM;
+        -- Propagate the exception
+        RAISE;
+END;
