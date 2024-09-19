@@ -22,3 +22,10 @@ For Docker compose, see : https://docs.docker.com/compose/install/
 3. Launch Docker
 
 4. Run ``docker-compose up --build``
+
+## First Elements of Architecture to understand this Goulasch
+
+## Reminder for pulling (dev only héhé)
+pull: `git subtree pull --prefix={{name_of_folder}} {{name_of_folder}} main --squash`
+execute the command `git remote -v` if pulling does not work, to see if a remote branch exists
+otherwise add it `git remote add {{name_of_folder}} {{link_to_repo}}` and check again `git remote -v`
