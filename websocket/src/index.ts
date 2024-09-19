@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { SocketService } from "./services";
+import { SocketService } from "./services/websocket";
 import { SocketConfig } from "./config";
 
 dotenv.config();

@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/pubsub": "^4.7.2",
     "@types/express": "^4.17.21",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",

@@ -3,10 +3,12 @@ import jwt from "jsonwebtoken";
 import { randomBytes } from "node:crypto";
 import http from "http";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { PubSub } from "@google-cloud/pubsub";
 
 export class SocketService {
   private static instance: SocketService;
   private userSocketMap: Map<string, { socketId: string; userId?: string }>;
+  private pubSubClient: PubSub;
 
   constructor(
     private io: IOServer<
@@ -20,6 +22,7 @@ export class SocketService {
     this.userSocketMap = new Map();
 
     this.initializeSocket();
+    this.pubSubClient = new PubSub();
   }
 
   public static getInstance(io: IOServer, http: http.Server): SocketService {
