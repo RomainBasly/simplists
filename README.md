@@ -1,6 +1,6 @@
 # Readme
 
-This repository contains the backend, frontend, and websocket server for my project.
+This repository contains the backend, frontend, and websocket server for my project. The idea is to be able to share simply lists with your relatives with instant communication using Websockets and later PubSub/Webpush for notifications.
 
 ## Structure
 - `backend/`: Contains the backend code.
@@ -24,6 +24,9 @@ For Docker compose, see : https://docs.docker.com/compose/install/
 4. Run ``docker-compose up --build``
 
 ## First Elements of Architecture to understand this Goulasch
+
+![image](https://github.com/user-attachments/assets/e0fa8e97-549e-47e2-8752-48fff7a3feb8)
+
 
 ## Reminder for pulling (dev only héhé)
 pull: `git subtree pull --prefix={{name_of_folder}} {{name_of_folder}} main --squash`
