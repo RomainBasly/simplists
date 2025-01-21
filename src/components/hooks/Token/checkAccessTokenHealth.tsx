@@ -1,7 +1,8 @@
+'use client'
 import { useState, useEffect, useCallback } from 'react'
-import useTokenService from './tokenService'
+import useTokenService from './useTokenService'
 
-export const useCheckAccessTokenHealth = () => {
+export const UseCheckAccessTokenHealth = () => {
   const { checkAndRefreshAccessToken } = useTokenService()
   const [token, setToken] = useState<string | null>(null)
 

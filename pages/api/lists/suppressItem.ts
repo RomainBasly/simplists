@@ -6,9 +6,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const cookieHeader = req.headers.cookie;
-  const elementId = req.body.elementId;
-  const listId = req.body.listId;
-  const beneficiaries = req.body.beneficiaries;
+  const { listName, item, elementId, listId, beneficiaries } = req.body;
+
 
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method Not Allowed" });
@@ -18,6 +17,8 @@ export default async function handler(
   try {
     const listsApi = ListsApi.getInstance();
     const itemSuppressed = await listsApi.suppressItem(
+      listName,
+      item,
       listId,
       elementId,
       beneficiaries,
@@ -25,7 +26,6 @@ export default async function handler(
         Cookie: cookieHeader || "",
       }
     );
-
     if (itemSuppressed.success) {
       return res.status(200).json({
         success: true,

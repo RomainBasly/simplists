@@ -14,8 +14,12 @@ type IProps = {
   content: string
   statusOpen: boolean
   animateSuppressionByItemId: boolean
-  onElementSuppress: (id: string) => Promise<boolean | null>
-  onCrossElement: (id: string, status: boolean) => Promise<boolean | null>
+  onElementSuppress: (item: string, id: string) => Promise<boolean | null>
+  onCrossElement: (
+    id: string,
+    changedElementName: string,
+    status: boolean,
+  ) => Promise<boolean | null>
   onInputSubmit: (
     updatedContent: string,
     elementId?: string,
@@ -120,7 +124,11 @@ export default function ListElement(props: IProps) {
 
   const handleCrossElement = async () => {
     try {
-      const trigger = await props.onCrossElement(props.id, props.statusOpen)
+      const trigger = await props.onCrossElement(
+        props.id,
+        props.content,
+        props.statusOpen,
+      )
       if (trigger) {
         setIsChoiceContainerOpen(false)
         setIsSelected(false)
@@ -148,9 +156,9 @@ export default function ListElement(props: IProps) {
     setIsChoiceContainerOpen(!isChoiceContainerOpen)
   }
 
-  async function suppressElement(id: string) {
+  async function suppressElement(item: string, id: string) {
     try {
-      await props.onElementSuppress(id)
+      await props.onElementSuppress(item, id)
     } catch (error) {
       // Todo : add error for that problem
       const errorMessage = getErrorMessage(error)
@@ -188,7 +196,6 @@ export default function ListElement(props: IProps) {
         className={classNames(classes['text-container'], {
           [classes['is-editing']]: isEditing,
         })}
-        onDoubleClick={handleEditMode}
       >
         {isTextContentVisible && (
           <div
@@ -236,7 +243,7 @@ export default function ListElement(props: IProps) {
         {!props.statusOpen && (
           <div
             className={classes['choice']}
-            onClick={() => suppressElement(props.id)}
+            onClick={() => suppressElement(props.content, props.id)}
           >
             <ExclamationTriangleIcon className={classes['svg']} />
             <div className={classes['text']}>Supprimer l'élement</div>

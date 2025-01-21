@@ -1,43 +1,51 @@
 'use client'
 import React, { useEffect } from 'react'
-// import { getSocket } from '../Socket'
-import { DefaultEventsMap } from '@socket.io/component-emitter'
 import { Socket } from 'socket.io-client'
 import { getSocket } from '../Socket'
+import {
+  ServerToClientEvents,
+  ClientToServerEvents,
+} from '../../../../types/types'
+import { convertUrlBase64ToUint8Array } from '@/components/Helpers'
+import { subscribeToNotifications } from '@/components/Utils/common'
 
 export default function ServiceWorkerInitiator() {
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined') {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/sw.js').then(
-            function (registration) {
-              console.log(
-                'Service Worker registration successful with scope: ',
-                registration.scope,
-              )
-            },
-            function (err) {
-              console.log('Service Worker registration failed: ', err)
-            },
-          )
-          navigator.serviceWorker.addEventListener('message', (event) => {
-            if (event.data && event.data.action === 'reinitializeWebSocket') {
-              const socket = getSocket()
-              if (!socket.connected) {
-                socket.connect()
+      const registerServiceWorkerAndWebsocketMessages = async () => {
+        if (typeof window !== 'undefined') {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(
+              function (registration) {
+                console.log(
+                  'Service Worker registration successful with scope: ',
+                  registration.scope,
+                )
+              },
+              function (err) {
+                console.log('Service Worker registration failed: ', err)
+              },
+            )
+            navigator.serviceWorker.addEventListener('message', (event) => {
+              if (event.data && event.data.action === 'reinitializeWebSocket') {
+                const socket = getSocket()
+                if (!socket.connected) {
+                  socket.connect()
+                }
               }
-            }
-          })
+            })
+          }
         }
       }
+      registerServiceWorkerAndWebsocketMessages()
     } catch (error) {
       console.log('error', error)
     }
   }, [])
 
   useEffect(() => {
-    // Function to check and (re)connect the socket
+    // As the socket can get disconnected after a certain period,
+    // we need to reconnect it to receive modifications made by the other participants
     const checkAndReconnectSocket = async () => {
       const socket = getSocket()
 
@@ -65,7 +73,7 @@ export default function ServiceWorkerInitiator() {
     }
 
     const testServerConnection = (
-      socket: Socket<DefaultEventsMap, DefaultEventsMap>,
+      socket: Socket<ServerToClientEvents, ClientToServerEvents>,
     ) => {
       return new Promise((resolve, reject) => {
         // Set a timeout for the test
@@ -89,6 +97,48 @@ export default function ServiceWorkerInitiator() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('online', checkAndReconnectSocket)
     }
+  }, [])
+
+  useEffect(() => {
+    const checkIfNotificationsAreGranted = async () => {
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        if (Notification.permission === 'granted') {
+          const registration = await navigator.serviceWorker.ready
+          const userAgent = navigator.userAgent
+          const existingSubscription = await registration.pushManager.getSubscription()
+
+          if (existingSubscription) {
+            subscribeToNotifications(
+              '/api/notifications/update',
+              existingSubscription,
+              userAgent,
+            )
+          } else {
+            const subscription = await registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: convertUrlBase64ToUint8Array(
+                process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+              ),
+            })
+
+            try {
+              subscribeToNotifications(
+                '/api/notifications/subscribe',
+                subscription,
+                userAgent,
+              )
+            } catch (error) {
+              console.error(
+                'Error updating the notification subscription in service worker initiator',
+                error,
+              )
+            }
+          }
+        }
+      }
+    }
+
+    checkIfNotificationsAreGranted()
   }, [])
   return <></>
 }

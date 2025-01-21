@@ -6,10 +6,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const cookieHeader = req.headers.cookie;
-  const elementId = req.body.elementId;
-  const contentUpdate = req.body.contentUpdate;
-  const listId = req.body.listId;
-  const beneficiaries = req.body.beneficiaries;
+  const { listName, elementId, contentUpdate, listId, beneficiaries } =
+    req.body;
 
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method Not Allowed" });
@@ -19,6 +17,7 @@ export default async function handler(
   try {
     const listsApi = ListsApi.getInstance();
     const itemContentUpdated = await listsApi.handleItemContentChange(
+      listName,
       listId,
       elementId,
       contentUpdate,

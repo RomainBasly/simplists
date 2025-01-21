@@ -124,13 +124,6 @@ workbox.routing.setCatchHandler(({ event }) => {
 
 // Use self instead of window for service workers
 self.addEventListener("install", (event) => {
-  // event.waitUntil(
-  //   caches
-  //     .open(workbox.core.cacheNames.precache) // Use workbox's precache cache name for consistency
-  //     .then((cache) => {
-  //       return cache.addAll(urlsToCache);
-  //     })
-  // );
   self.skipWaiting();
   console.log("Service Worker installing.");
 });
@@ -140,24 +133,54 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
 });
 
-// self.addEventListener("message", (event) => {
-//   let data = event.data;
-//   console.log("SW received", data);
+self.addEventListener("push", (event) => {
+  if (!event.data) {
+    return;
+  }
+  let data = {};
 
-//   if ("checkOnline" in data) {
-//     let url = "/images/logos/logo-128x128.png";
-//     console.log("I passed here in the checkOnline condition");
-//     event.waitUntil(
-//       fetch(url, { method: "HEAD" }).then((response) => {
-//         if (response.ok) {
-//           sendMessageToClient({ isOnline: true });
-//         } else {
-//           return sendMessage({ isOnline: false });
-//         }
-//       })
-//     );
-//   }
-// });
+  try {
+    data = event.data.json();
+  } catch (err) {
+    data = { title: "Notification", body: event.data.text() };
+  }
+
+  const title = data.title || "Nouvelle notification";
+  const body = data.body || "Pas de contenu";
+  const icon = data.icon || "/images/logos/logo-48x48.png";
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon,
+      data: {
+        url: data.url,
+      },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const urlToOpen =
+    event.notification.data?.url || "https://www.simplists.net/";
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((windowClients) => {
+        for (const client of windowClients) {
+          if (client.url === urlToOpen && "focus" in client) {
+            return client.focus();
+          }
+        }
+        // If not, open a new tab
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
 
 self.clients.matchAll().then((clients) => {
   clients.forEach((client) => {

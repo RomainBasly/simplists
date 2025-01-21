@@ -1,19 +1,19 @@
 import React from 'react'
 import classes from './classes.module.scss'
 import { Cog8ToothIcon } from '@heroicons/react/24/solid'
-import { IBeneficiary, IList, IUser } from '../ListPage'
 import { useRouter } from 'next/navigation'
+import { IBeneficiary } from '../../../../../types/types'
 
 type IProps = {
   id: string
   listName: string
-  thematic: string
-  description: string
+  thematic?: string
   beneficiaries?: IBeneficiary[]
 }
 
 export default function ListCard(props: IProps) {
   const router = useRouter()
+
   function formatTitle(listName: string): string {
     const firstLetter = listName[0].toUpperCase()
     let restOfLetters: string = ''
@@ -24,30 +24,6 @@ export default function ListCard(props: IProps) {
     return firstLetter + restOfLetters
   }
 
-  function formatBeneficiaries(beneficiaryList: IBeneficiary[]) {
-    if (props.beneficiaries) {
-      switch (beneficiaryList.length) {
-        case 0:
-          return 'Liste privée ou non acceptée par les autres bénéficiaires'
-        case 1:
-          return `Partagée avec ${props.beneficiaries[0]['app-users'].userName}`
-        case 2:
-          return `Partagée avec ${props.beneficiaries[0]['app-users'].userName} et ${props.beneficiaries[1]['app-users'].userName}`
-        case 3:
-          return `Partagée avec ${props.beneficiaries[0]['app-users'].userName}, ${props.beneficiaries[1]['app-users'].userName}
-      et ${props.beneficiaries[2]['app-users'].userName}`
-        case 4:
-          return `Partagée avec ${props.beneficiaries[0]['app-users'].userName}, ${props.beneficiaries[1]['app-users'].userName}
-      et ${props.beneficiaries[2]['app-users'].userName} et une autre personne`
-        default:
-          return `Partagée avec ${
-            props.beneficiaries[0]['app-users'].userName
-          }, ${props.beneficiaries[1]['app-users'].userName} et ${
-            props.beneficiaries[2]['app-users'].userName
-          } et ${props.beneficiaries.length - 2} autres personnes`
-      }
-    }
-  }
 
   const handleListSettingsClick = (event: React.MouseEvent, listId: string) => {
     event.stopPropagation()
@@ -66,9 +42,9 @@ export default function ListCard(props: IProps) {
         </div>
       </div>
       <div className={classes['title']}>{formatTitle(props.listName)}</div>
-      <div className={classes['shared-with']}>
+      {/* <div className={classes['shared-with']}>
         {props.beneficiaries && formatBeneficiaries(props.beneficiaries)}
-      </div>
+      </div> */}
     </div>
   )
 }

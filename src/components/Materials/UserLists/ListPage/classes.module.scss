@@ -2,19 +2,23 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 10px;
+  gap: 4px;
   max-width: 650px;
   width: 100%;
   padding-top: 30px;
-  height: 90%;
+  padding-bottom: 30px;
+  overflow: hidden;
+  min-height: 100vh;
+  height: 95vh;
 
-  @media screen and (max-width: 400px) {
-    padding-top: 10px;
+  @media screen and (max-width: 460px) {
+    padding-top: 0px;
     max-width: 320px;
   }
   @media screen and (max-width: 320px) {
-    padding: 6px 18px;
     max-width: 280px;
+    height: 85%;
+    gap: 0px;
   }
 
   .list-item {
@@ -34,22 +38,12 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
+    padding-top: 10px;
+    padding-bottom: 50px;
 
-    // @media screen and (max-height: 950px) {
-    //   max-height: 500px;
-    // }
-    // @media screen and (max-height: 900px) {
-    //   max-height: 480px;
-    // }
-    // @media screen and (max-height: 800px) {
-    //   max-height: 460px;
-    // }
     @media screen and (max-width: 360px) {
-      gap: 0px;
-    }
-    @media screen and (max-width: 320px) {
       gap: 0px;
     }
   }
@@ -61,7 +55,23 @@
     align-items: center;
   }
 
-  .dynamic-button-container {
+  .dynamic-button-input {
     display: flex;
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    right: 20px;
+    opacity: 1;
+    z-index: 5;
+
+    // @media screen and (max-width: 420px) {
+    // bottom: 70px;
+    // }
+    // @media screen and (max-width: 360px) {
+    //   bottom: 0px;
+    // }
+    @media screen and (max-width: 320px) {
+      bottom: 60px;
+    }
   }
 }

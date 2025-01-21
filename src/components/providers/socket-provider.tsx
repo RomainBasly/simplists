@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import Cookies from 'js-cookie'
 import { getSocket } from '../Elements/Socket'
 
@@ -12,6 +12,13 @@ type SocketContextType = {
     author?: string
     description?: string
   }
+}
+
+type IListAttribute = {
+  listId: number | null
+  listName?: string
+  author?: string
+  description?: string
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -30,12 +37,12 @@ export const useSocket = () => {
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [isConnected, setIsConnected] = useState(false)
-  const [listAttributes, setListAttributes] = useState<{
-    listId: number | null
-    listName?: string
-    author?: string
-    description?: string
-  }>({ listId: null, listName: '', author: '', description: '' })
+  const [listAttributes, setListAttributes] = useState<IListAttribute>({
+    listId: null,
+    listName: '',
+    author: '',
+    description: '',
+  })
 
   useEffect(() => {
     const socket = getSocket()
@@ -53,18 +60,23 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     const assignId = (data: { socketId: string }) => {
       localStorage.setItem('socketId', data.socketId)
-      const accessTokenJWT = Cookies.get('accessToken')
+      const accessToken = Cookies.get('accessToken')
       socket.emit('register-user-id', {
         socketId: localStorage.getItem('socketId'),
-        accessTokenJWT,
+        accessToken,
       })
     }
 
     socket.on('assign-socket-id', assignId)
   }, [])
 
+  const contextValue = useMemo(() => ({ isConnected, listAttributes }), [
+    listAttributes,
+    isConnected,
+  ])
+
   return (
-    <SocketContext.Provider value={{ isConnected, listAttributes }}>
+    <SocketContext.Provider value={contextValue}>
       {children}
     </SocketContext.Provider>
   )
