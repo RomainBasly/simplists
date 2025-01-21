@@ -1,9 +1,8 @@
-import JwtService from "@/Services/jwtService";
-import { IList, IListElement } from "../Materials/UserLists";
-import { IElement } from "../Materials/UserLists/ListPage";
-import Cookies from 'js-cookie'
+import { IElement } from "../../../types/types";
+import { INotification } from "../Materials/NotificationsList/types";
+import { IList } from "../Materials/UserLists";
 
-export function sortItemObjectByUpdatedDateDSC(
+export function sortListItemObjectByUpdatedDateDSC(
   objectA: IElement,
   objectB: IElement
 ) {
@@ -12,7 +11,19 @@ export function sortItemObjectByUpdatedDateDSC(
 
   return dateB.getTime() - dateA.getTime();
 }
-export function sortItemObjectByUpdatedDateASC(
+
+// Todo - deal with this warning
+export function sortListNotificationsObjectByUpdatedDateDSC(
+  objectA: INotification,
+  objectB: INotification
+) {
+  let dateA = new Date(objectA.updated_at);
+  let dateB = new Date(objectB.updated_at);
+
+  return dateB.getTime() - dateA.getTime();
+}
+
+export function sortListItemObjectByUpdatedDateASC(
   objectA: IElement,
   objectB: IElement
 ) {
@@ -36,3 +47,29 @@ export function sortItemListObjectByNameASC(a: IList, b: IList) {
   return 0;
 }
 
+type Items = {
+  content: string;
+};
+
+export function sortListItemsByAlphabeticContent(a: Items, b: Items): number {
+  if (a.content.toLocaleLowerCase() > b.content.toLocaleLowerCase()) {
+    return 1;
+  } else if (a.content.toLocaleLowerCase() === b.content.toLocaleLowerCase()) {
+    return 0;
+  } else return -1;
+}
+
+export function convertUrlBase64ToUint8Array(base64String: string | undefined) {
+  if (base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+}

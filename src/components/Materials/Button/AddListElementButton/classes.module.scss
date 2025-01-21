@@ -26,6 +26,7 @@
     left: 0;
     transform: translateX(0);
     background-color: #eaf2d7;
+    min-height: 100%;
 
     @media screen and (max-width: 320px) {
       padding: 2px 20px;

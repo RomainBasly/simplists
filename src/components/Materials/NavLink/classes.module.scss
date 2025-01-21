@@ -35,10 +35,14 @@
   //   text-decoration: dashed;
   // }
 
-  svg {
+  .svg {
     display: flex;
     height: 20px;
     color: #2a5293;
     stroke-width: 2;
+  }
+  .text {
+    display: flex;
+    width: 100%;
   }
 }

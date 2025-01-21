@@ -23,6 +23,6 @@ export default async function handler(
   } catch (error) {
     // Handle errors (e.g., from your backend call)
     console.log("error is10", error);
-    res.status(500).json({ error: "Failed to fetch invitations" });
+    res.status(500).json({ error: "Failed to fetch new Token" });
   }
 }

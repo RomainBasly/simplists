@@ -7,6 +7,8 @@ import { headers } from 'next/headers'
 import ServiceWorkerInitiator from '@/components/Elements/ServiceWorkerInitiator'
 import { SocketProvider } from '@/components/providers/socket-provider'
 import { UserInfoProvider } from '@/components/providers/user-info-provider'
+import { InvitationsInfoProvider } from '@/components/providers/invitations-provider'
+import { NotificationsProvider } from '@/components/providers/notifications-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -64,7 +66,11 @@ export default function RootLayout({
     <html lang="fr">
       <body className={inter.className}>
         <SocketProvider>
-          <UserInfoProvider>{children}</UserInfoProvider>
+          <NotificationsProvider>
+            <InvitationsInfoProvider>
+              <UserInfoProvider>{children}</UserInfoProvider>
+            </InvitationsInfoProvider>
+          </NotificationsProvider>
         </SocketProvider>
       </body>
       <Script strategy="afterInteractive" nonce={nonce ?? 'nothing'} />

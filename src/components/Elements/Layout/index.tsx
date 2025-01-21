@@ -4,6 +4,7 @@ import SideMenu from '../SideMenu'
 
 import dynamic from 'next/dynamic'
 import classes from './classes.module.scss'
+import ListHeader from '../Headers/ListHeader'
 
 export type ILayoutProps = {
   children: React.ReactNode
@@ -24,7 +25,7 @@ export default function Layout({ children, pageType }: ILayoutProps) {
         content="width=device-width, initial-scale=1"
       ></meta>
       <meta name="x-nonce" content={nonce ?? 'default-nonce'} />
-      {pageType !== 'login' && pageType !== 'register' && (
+      {pageType !== 'login' && pageType !== 'register' && pageType !== 'list' && (
         <div className={classes['root']}>
           <Header className={classes['header']} />
           <SideMenu />
@@ -35,6 +36,17 @@ export default function Layout({ children, pageType }: ILayoutProps) {
             />
           </div>
         </div>
+      )}
+      {pageType === 'list' && (
+        <div className={classes['root']}>
+        <ListHeader className={classes['header']} />
+        <div className={classes['layout-content']}>
+          {children}
+          <NetworkStatusNotifierWithNoSSR
+            className={classes['internet-notifier']}
+          />
+        </div>
+      </div>
       )}
       {(pageType === 'login' || pageType === 'register') && (
         <div className={classes['root']}>

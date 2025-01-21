@@ -1,5 +1,4 @@
-import { jwtVerify, decodeJwt, JWTPayload } from "jose";
-import { JwtPayload } from "jsonwebtoken";
+import { decodeJwt, JWTPayload } from "jose";
 
 export default class JwtService {
   private static instance: JwtService | null = null;

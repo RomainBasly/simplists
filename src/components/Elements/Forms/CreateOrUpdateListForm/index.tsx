@@ -22,8 +22,7 @@ import {
 import { sanitize } from 'isomorphic-dompurify'
 import CustomSelector from '@/components/Materials/CustomSelector'
 import classnames from 'classnames'
-import classNames from 'classnames'
-import { useCheckAccessTokenHealth } from '@/components/Utils/checkAccessTokenHealth'
+import { UseCheckAccessTokenHealth } from '@/components/hooks/Token/checkAccessTokenHealth'
 
 export interface Body {
   listName: string
@@ -87,7 +86,7 @@ export function CreateOrUpdateListForm(props: EditListProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const router = useRouter()
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true)
-  const { checkToken } = useCheckAccessTokenHealth()
+  const { checkToken } = UseCheckAccessTokenHealth()
   const url =
     props.mode === 'create'
       ? '/api/lists/createList'
@@ -634,7 +633,7 @@ export function CreateOrUpdateListForm(props: EditListProps) {
                 Avec qui la partager ?
               </label>
               <div
-                className={classNames(
+                className={classnames(
                   classes['input-container'],
                   classes['input-container-row'],
                 )}

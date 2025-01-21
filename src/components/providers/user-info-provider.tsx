@@ -1,8 +1,8 @@
 'use client'
 import JwtService from '@/Services/jwtService'
 import Cookies from 'js-cookie'
-import { createContext, useContext, useEffect, useState } from 'react'
-import { JWTPayload } from '../../../types'
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { JWTPayload } from '../../../types/types'
 
 const UserInfoContext = createContext<any>({
   userId: null,
@@ -37,8 +37,10 @@ export const UserInfoProvider = ({
     }
   }, [])
 
+  const contextValue = useMemo(() => ({ userAttributes }), [userAttributes])
+
   return (
-    <UserInfoContext.Provider value={{ userAttributes }}>
+    <UserInfoContext.Provider value={contextValue}>
       {children}
     </UserInfoContext.Provider>
   )

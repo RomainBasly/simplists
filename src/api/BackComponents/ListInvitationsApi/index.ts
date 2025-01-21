@@ -56,7 +56,7 @@ export default class ListInvitationsApi extends BaseApiService {
     try {
       return await this.postRequest<any>(
         url,
-        { listId, status },
+        { listId, status, invitationId },
         {
           Cookie: params.Cookie,
         }
