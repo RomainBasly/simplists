@@ -3,12 +3,11 @@ import jwt from "jsonwebtoken";
 import { randomBytes } from "node:crypto";
 import http from "http";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import { PubSub } from "@google-cloud/pubsub";
+import { PubSubService } from "../pubsub";
 
 export class SocketService {
   private static instance: SocketService;
   private userSocketMap: Map<string, { socketId: string; userId?: string }>;
-  private pubSubClient: PubSub;
 
   constructor(
     private io: IOServer<
@@ -20,9 +19,7 @@ export class SocketService {
     private httpServer: http.Server
   ) {
     this.userSocketMap = new Map();
-
     this.initializeSocket();
-    this.pubSubClient = new PubSub();
   }
 
   public static getInstance(io: IOServer, http: http.Server): SocketService {
@@ -49,87 +46,10 @@ export class SocketService {
         this.userSocketMap.delete(socketId);
       });
 
-      socket.on("adding-item-to-list-backend", (data: any) => {
-        const elementToPassToFront = data.addedItem;
-        data.beneficiaries.map((person: any) => {
-          const userId = person["app-users"].user_id;
-
-          // TODO : see what we can do for multi device connexion
-          const targetSocketId = this.findSocketIdByUserId(userId);
-
-          if (targetSocketId) {
-            this.io.to(targetSocketId).emit("adding-item-to-list-socket", {
-              elementToPass: elementToPassToFront,
-            });
-          }
-        });
-      });
-
-      socket.on("suppress-item-from-list-backend", (data: any) => {
-        const elementId = data.elementId;
-        data.beneficiaries.map((person: any) => {
-          const userId = person["app-users"].user_id;
-
-          // TODO : see what we can do for multi device connexion
-          const targetSocketId = this.findSocketIdByUserId(userId);
-
-          if (targetSocketId) {
-            this.io.to(targetSocketId).emit("suppress-item-from-list-socket", {
-              elementId,
-            });
-          }
-        });
-      });
-
-      socket.on("update-item-content-backend", (data: any) => {
-        const elementToPassToFront = data.updatedItem;
-        data.beneficiaries.map((person: any) => {
-          const userId = person["app-users"].user_id;
-
-          // TODO : see what we can do for multi device connexion
-          const targetSocketId = this.findSocketIdByUserId(userId);
-
-          if (targetSocketId) {
-            this.io.to(targetSocketId).emit("update-item-content-socket", {
-              elementToPass: elementToPassToFront,
-            });
-          }
-        });
-      });
-
-      socket.on("change-item-status-backend", (data: any) => {
-        const elementToPassToFront = data.updatedItem;
-        data.beneficiaries.map((person: any) => {
-          const userId = person["app-users"].user_id;
-
-          // TODO : see what we can do for multi device connexion
-          const targetSocketId = this.findSocketIdByUserId(userId);
-
-          if (targetSocketId) {
-            this.io.to(targetSocketId).emit("change-item-status-socket", {
-              elementToPass: elementToPassToFront,
-            });
-          }
-        });
-      });
-
-      socket.on("list-invitation-backend", (data: any) => {
-        const { userId } = data;
-
-        // TODO : see what we can do for multi device connexion
-        const targetSocketId = this.findSocketIdByUserId(userId);
-
-        if (targetSocketId) {
-          this.io.to(targetSocketId).emit("list-invitation-socket", {
-            data,
-          });
-        }
-      });
-
       socket.on("register-user-id", (data) => {
-        const { accessTokenJWT, socketId } = data;
+        const { accessToken, socketId } = data;
 
-        const decoded = jwt.decode(accessTokenJWT);
+        const decoded = jwt.decode(accessToken);
         if (
           typeof decoded === "object" &&
           decoded !== null &&
@@ -157,6 +77,15 @@ export class SocketService {
 
         console.log("this.userSocketId", this.userSocketMap);
       });
+
+      socket.on("unregister-user-id", (data) => {
+        const { socketId } = data;
+
+        if (this.userSocketMap.has(socketId)) {
+          this.userSocketMap.set(socketId, { socketId: socket.id });
+          console.log(`Removed userId association for socketId ${socketId}`);
+        }
+      });
     });
 
     this.io.on("error", (err) => {
@@ -165,6 +94,31 @@ export class SocketService {
 
     this.httpServer.on("error", (err) => {
       console.error("HTTP server error:", err);
+    });
+  }
+
+  public registerListeners(pubSubService: PubSubService, event: string) {
+    pubSubService.on(event, (data) => {
+      this.publishEvent(event, data);
+    });
+  }
+
+  private publishEvent(action: string, payload: any, recepients?: unknown) {
+    const elementToPublish = payload;
+    console.log("elementToPublish", payload, payload.beneficiaries);
+    payload.beneficiaries.map((person: any) => {
+      console.log("beneficiaries", person);
+      const userId = person["app-users"].user_id;
+
+      // TODO : see what we can do for multi device connexion
+      const targetSocketId = this.findSocketIdByUserId(userId);
+      console.log("targetSocketId", targetSocketId);
+      console.log("action", action);
+      if (targetSocketId) {
+        this.io.to(targetSocketId).emit(action, {
+          payload,
+        });
+      }
     });
   }
 

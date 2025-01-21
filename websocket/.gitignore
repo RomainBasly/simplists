@@ -1,3 +1,4 @@
 node_modules
 .env
 /dist
+/key-pub-sub.json

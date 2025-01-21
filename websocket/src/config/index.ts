@@ -1,6 +1,6 @@
 import http from "http";
 import express from "express";
-import { Server as IOServer, Socket } from "socket.io";
+import { Server as IOServer } from "socket.io";
 
 export class SocketConfig {
   private static instance: SocketConfig;
