@@ -4,8 +4,10 @@ const express_1 = require("express");
 const tsyringe_1 = require("tsyringe");
 const controller_1 = require("../api/app-list-management/controller");
 const controller_2 = require("../api/app-user-invitations/controller");
+const controller_3 = require("../api/app-notifications/controller");
 const appListManagementController = tsyringe_1.container.resolve(controller_1.ListManagementController);
 const appUserInvitationsController = tsyringe_1.container.resolve(controller_2.AppUserInvitationsController);
+const appNotificationsController = tsyringe_1.container.resolve(controller_3.AppNotificationsController);
 const protectedRoutes = (0, express_1.Router)();
 protectedRoutes
     .post('/api/lists/create-list', (req, res, next) => {
@@ -19,6 +21,24 @@ protectedRoutes
 })
     .get('/api/lists/get-user-lists', (req, res, next) => {
     appListManagementController.getListForUserById(req, res, next);
+})
+    .get('/api/notifications/fetch-notifications-preferences', (req, res, next) => {
+    appNotificationsController.fetchNotificationsPreferences(req, res, next);
+})
+    .get('/api/notifications/get-notifications', (req, res, next) => {
+    appNotificationsController.getNotificationsByUserId(req, res, next);
+})
+    .post('/api/notifications/subscribe', (req, res, next) => {
+    appNotificationsController.subscribeToNotifications(req, res, next);
+})
+    .post('/api/notifications/update', (req, res, next) => {
+    appNotificationsController.updateNotificationsPreferences(req, res, next);
+})
+    .post('/api/notifications/modify-notification-status', (req, res, next) => {
+    appNotificationsController.modifyNotificationStatus(req, res, next);
+})
+    .delete('/api/notifications/delete-notification-by/:notificationId', (req, res, next) => {
+    appNotificationsController.deleteNotificationById(req, res, next);
 })
     .get('/api/lists/get-list-definition/:listId', (req, res, next) => {
     appListManagementController.getListDefinitionBydListId(req, res, next);

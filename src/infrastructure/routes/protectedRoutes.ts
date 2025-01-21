@@ -2,9 +2,11 @@ import { Router } from 'express';
 import { container } from 'tsyringe';
 import { ListManagementController } from '../api/app-list-management/controller';
 import { AppUserInvitationsController } from '../api/app-user-invitations/controller';
+import { AppNotificationsController } from '../api/app-notifications/controller';
 
 const appListManagementController = container.resolve(ListManagementController);
 const appUserInvitationsController = container.resolve(AppUserInvitationsController);
+const appNotificationsController = container.resolve(AppNotificationsController);
 
 const protectedRoutes = Router();
 
@@ -20,6 +22,24 @@ protectedRoutes
   })
   .get('/api/lists/get-user-lists', (req, res, next) => {
     appListManagementController.getListForUserById(req, res, next);
+  })
+  .get('/api/notifications/fetch-notifications-preferences', (req, res, next) => {
+    appNotificationsController.fetchNotificationsPreferences(req, res, next);
+  })
+  .get('/api/notifications/get-notifications', (req, res, next) => {
+    appNotificationsController.getNotificationsByUserId(req, res, next);
+  })
+  .post('/api/notifications/subscribe', (req, res, next) => {
+    appNotificationsController.subscribeToNotifications(req, res, next);
+  })
+  .post('/api/notifications/update', (req, res, next) => {
+    appNotificationsController.updateNotificationsPreferences(req, res, next);
+  })
+  .post('/api/notifications/modify-notification-status', (req, res, next) => {
+    appNotificationsController.modifyNotificationStatus(req, res, next);
+  })
+  .delete('/api/notifications/delete-notification-by/:notificationId', (req, res, next) => {
+    appNotificationsController.deleteNotificationById(req, res, next);
   })
   .get('/api/lists/get-list-definition/:listId', (req, res, next) => {
     appListManagementController.getListDefinitionBydListId(req, res, next);

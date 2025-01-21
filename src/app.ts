@@ -4,8 +4,8 @@ import 'reflect-metadata';
 import express, { Express } from 'express';
 import cors from 'cors';
 import { corsOptions } from './config/common';
-import protectedRouter from './infrastructure/routes/protectedRoutes';
 import publicRouter from './infrastructure/routes/publicRoutes';
+import protectedRouter from './infrastructure/routes/protectedRoutes';
 import { corsOriginCheck, verifyRequestApiKey, verifyUserAccessToken } from './middlewares/auth-middleware';
 import cookieParser from 'cookie-parser';
 
@@ -39,3 +39,5 @@ app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+export default app;

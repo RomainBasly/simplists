@@ -120,6 +120,19 @@ let AppUserInvitationsRepository = class AppUserInvitationsRepository {
             throw error;
         }
     }
+    async getBeneficiariesByListId(listId, userId) {
+        try {
+            const { data } = await supabaseConfig_1.default
+                .from('app-list-beneficiaries')
+                .select('app-users:user-id(user_id, userName)')
+                .eq('app-list-id', listId)
+                .neq('user-id', userId);
+            return data;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
 };
 exports.AppUserInvitationsRepository = AppUserInvitationsRepository;
 exports.AppUserInvitationsRepository = AppUserInvitationsRepository = __decorate([

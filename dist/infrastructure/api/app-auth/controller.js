@@ -66,11 +66,15 @@ let AppAuthController = class AppAuthController {
             const userId = req.body['userId'];
             if (!cookieHeaders) {
                 await this.appAuthService.logoutUser(userId);
+                res.status(200).json({
+                    status: 'ok',
+                    message: 'Disconnection OK. Please clear cookies and redirect to login page.',
+                    action: 'clear_cookies_and_redirect',
+                    redirectUrl: '/login',
+                });
                 return;
             }
-            const refreshToken = (0, helpers_1.parseCookies)(cookieHeaders)['refreshToken'];
-            //const cookieRefreshToken = retrieveTokenFromCookie(cookieHeaders, 'refreshToken');
-            await this.appAuthService.logoutUser(userId, refreshToken);
+            await this.appAuthService.logoutUser(userId);
             res.status(200).json({
                 status: 'ok',
                 message: 'Disconnection OK. Please clear cookies and redirect to login page.',

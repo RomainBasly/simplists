@@ -31,8 +31,7 @@ export class ListManagementController {
         cyphered,
         thematic,
       });
-      const response = await this.listManagementService.createList(validatedInputs, creatorUserName, creatorEmail);
-      console.log('response from list creation in prod - controller', response);
+      await this.listManagementService.createList(validatedInputs, creatorUserName, creatorEmail);
       res.status(201).json({ message: 'new list created' });
     } catch (error) {
       next(error);
@@ -61,6 +60,7 @@ export class ListManagementController {
       next(error);
     }
   }
+
   public async getListById(req: Request, res: Response, next: NextFunction) {
     try {
       const { userInfo } = getFromJWTToken(req, 'accessToken') as UserInfo;
@@ -73,14 +73,20 @@ export class ListManagementController {
       next(error);
     }
   }
+
   public async addItemToList(req: Request, res: Response, next: NextFunction) {
     try {
       const { userInfo } = getFromJWTToken(req, 'accessToken') as UserInfo;
       const listId = req.body.listId as UUID;
       const userId = userInfo.id;
-      const content = req.body.content;
-      const beneficiaries = req.body.beneficiaries;
-      const addedElement = await this.listManagementService.addItemToList(listId, userId, content, beneficiaries);
+      const { listName, content, beneficiaries } = req.body;
+      const addedElement = await this.listManagementService.addItemToList(
+        listName,
+        listId,
+        userId,
+        content,
+        beneficiaries
+      );
       res.status(200).json({ message: 'item added', addedElement });
     } catch (error) {
       next(error);
@@ -92,9 +98,9 @@ export class ListManagementController {
       const { userInfo } = getFromJWTToken(req, 'accessToken') as UserInfo;
       const elementId = req.body.elementId;
       const listId = req.body.listId as UUID;
-      const beneficiaries = req.body.beneficiaries;
+      const { beneficiaries, item, listName } = req.body;
       const userId = userInfo.id;
-      await this.listManagementService.suppressElementById(listId, userId, elementId, beneficiaries);
+      await this.listManagementService.suppressElementById(listName, item, listId, userId, elementId, beneficiaries);
       res.status(200).json({ success: true, message: 'item suppressed' });
     } catch (error) {
       next(error);
@@ -105,14 +111,15 @@ export class ListManagementController {
     try {
       const { userInfo } = getFromJWTToken(req, 'accessToken') as UserInfo;
       const elementId = req.body.elementId;
-      const status = req.body.status;
+      const { status, beneficiaries, listName, changedElementName } = req.body;
       const listId = req.body.listId as UUID;
-      const beneficiaries = req.body.beneficiaries;
       const userId = userInfo.id;
       const response = await this.listManagementService.changeItemStatus(
+        listName,
         listId,
         userId,
         elementId,
+        changedElementName,
         status,
         beneficiaries
       );

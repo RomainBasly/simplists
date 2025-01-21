@@ -1,6 +1,6 @@
 'use strict';
 import nodeMailer from 'nodemailer';
-import { EMAILSUBJECT, emailConfig as emailConfig, mailtrapConfig } from '../../config/email';
+import { EMAILSUBJECT, emailConfig as emailConfig, mailtrapConfig } from './mailTrapConfig';
 import { inject, injectable } from 'tsyringe';
 import ejs from 'ejs';
 import path from 'path';

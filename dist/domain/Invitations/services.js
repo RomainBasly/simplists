@@ -19,11 +19,15 @@ const tsyringe_1 = require("tsyringe");
 const services_1 = require("../../infrastructure/webSockets/services");
 const AppUserInvitationsRepository_1 = require("../../infrastructure/database/repositories/AppUserInvitationsRepository");
 const index_1 = __importDefault(require("../../domain/user/index"));
+const services_2 = require("../../infrastructure/gcp-pubsub/services");
+const services_3 = require("../NotificationsManagement/services");
 let UserInvitationsService = class UserInvitationsService {
-    constructor(webSocketService, appUserInvitationsRepository, appUserService) {
+    constructor(webSocketService, redisPubSubService, appUserInvitationsRepository, appUserService, appNotificationsService) {
         this.webSocketService = webSocketService;
+        this.redisPubSubService = redisPubSubService;
         this.appUserInvitationsRepository = appUserInvitationsRepository;
         this.appUserService = appUserService;
+        this.appNotificationsService = appNotificationsService;
     }
     async addPeopleToListInvitations(invitedEmailAddresses, listId, creatorId, creatorEmail, creatorUserName, listName, thematic, listDescription) {
         await this.appUserInvitationsRepository.inviteUsersToList(invitedEmailAddresses, listId, creatorId);
@@ -41,11 +45,11 @@ let UserInvitationsService = class UserInvitationsService {
     }
     async invitePeople(invitedUsers, listId, creatorEmail, creatorUserName, listName, thematic, listDescription) {
         // TODO: refacto to have one only transaction
-        invitedUsers.map((invitation) => {
+        invitedUsers.forEach(async (invitation) => {
+            var _a;
             if (invitation.is_already_active_user) {
                 try {
-                    //userId : userId to invite
-                    this.webSocketService.emit('list-invitation-backend', {
+                    const redisPayload = {
                         id: invitation.id,
                         userId: invitation.user_id,
                         status: 1,
@@ -55,10 +59,38 @@ let UserInvitationsService = class UserInvitationsService {
                         listName,
                         thematic,
                         listDescription,
+                    };
+                    await this.redisPubSubService.publishEvent('list_creation', {
+                        action: 'list_creation',
+                        payload: redisPayload,
+                        userName: creatorUserName,
+                        beneficiaries: [
+                            {
+                                'app-users': {
+                                    user_id: invitation.user_id,
+                                },
+                            },
+                        ],
                     });
+                    //userId : userId to invite
                 }
                 catch (error) {
                     throw new Error(`message: ${error}`);
+                }
+                try {
+                    const payload = JSON.stringify({
+                        title: 'Vous avez été invité(e) à une nouvelle liste',
+                        body: `${creatorUserName} vous a invité à la liste ${listName}`,
+                        icon: '/images/logos/logo-48x48.png',
+                        url: `https://www.simplists.net/invitations`,
+                    });
+                    const beneficiary = {
+                        user_id: (_a = invitation.user_id) !== null && _a !== void 0 ? _a : '',
+                    };
+                    await this.appNotificationsService.sendSinglePushNotification(beneficiary, payload);
+                }
+                catch (error) {
+                    throw error;
                 }
             }
             else {
@@ -74,6 +106,15 @@ let UserInvitationsService = class UserInvitationsService {
                 return;
             }
             const response = await this.appUserInvitationsRepository.changeInvitationStatus(invitationId, userId, listId, status);
+            // get all the users that are beneficiaries of the list
+            const beneficiairies = await this.appUserInvitationsRepository.getBeneficiariesByListId(listId, userId);
+            const user = await this.appUserService.getUserByUserId(userId);
+            await this.redisPubSubService.publishEvent('list_invitation_status_change', {
+                action: 'list_invitation_status_change',
+                status,
+                beneficiairies,
+                userName: user,
+            });
             return response;
         }
         catch (error) {
@@ -97,10 +138,14 @@ let UserInvitationsService = class UserInvitationsService {
 UserInvitationsService = __decorate([
     (0, tsyringe_1.injectable)(),
     __param(0, (0, tsyringe_1.inject)((0, tsyringe_1.delay)(() => services_1.WebSocketClientService))),
-    __param(1, (0, tsyringe_1.inject)(AppUserInvitationsRepository_1.AppUserInvitationsRepository)),
-    __param(2, (0, tsyringe_1.inject)(index_1.default)),
+    __param(1, (0, tsyringe_1.inject)((0, tsyringe_1.delay)(() => services_2.RedisPubSubService))),
+    __param(2, (0, tsyringe_1.inject)(AppUserInvitationsRepository_1.AppUserInvitationsRepository)),
+    __param(3, (0, tsyringe_1.inject)(index_1.default)),
+    __param(4, (0, tsyringe_1.inject)(services_3.AppNotificationsService)),
     __metadata("design:paramtypes", [services_1.WebSocketClientService,
+        services_2.RedisPubSubService,
         AppUserInvitationsRepository_1.AppUserInvitationsRepository,
-        index_1.default])
+        index_1.default,
+        services_3.AppNotificationsService])
 ], UserInvitationsService);
 exports.default = UserInvitationsService;

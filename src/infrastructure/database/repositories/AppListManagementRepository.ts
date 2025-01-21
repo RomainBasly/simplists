@@ -135,7 +135,7 @@ export class AppListManagementRepository {
 
   public async suppressItemById(listId: UUID, elementId: string) {
     try {
-      await supabase.from('app-list-items').delete().eq('id', elementId).eq('list_id', listId);
+      return await supabase.from('app-list-items').delete().eq('id', elementId).eq('list_id', listId);
     } catch (error) {
       throw error;
     }
@@ -209,7 +209,7 @@ export class AppListManagementRepository {
     }
   }
 
-  public async deleteListByListId(listId: UUID) {
+  public async deleteListBy(listId: UUID) {
     try {
       const { data } = await supabase.from('app-lists').delete().eq('id', listId);
       return data;

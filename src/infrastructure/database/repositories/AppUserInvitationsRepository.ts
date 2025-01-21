@@ -111,4 +111,17 @@ export class AppUserInvitationsRepository {
       throw error;
     }
   }
+
+  public async getBeneficiariesByListId(listId: UUID, userId: number) {
+    try {
+      const { data } = await supabase
+        .from('app-list-beneficiaries')
+        .select('app-users:user-id(user_id, userName)')
+        .eq('app-list-id', listId)
+        .neq('user-id', userId);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
