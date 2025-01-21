@@ -13,4 +13,13 @@ export default class AppUserService {
       throw error;
     }
   }
+
+  public async getUserByUserId(userId: number) {
+    try {
+      const user = await this.appUserRepository.getUserNameByUserId(userId);
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

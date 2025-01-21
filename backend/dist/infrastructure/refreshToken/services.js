@@ -29,7 +29,6 @@ let RefreshTokenService = class RefreshTokenService {
             throw new errors_1.NoPreexistingRefreshToken(errors_1.ErrorMessages.NO_EXISTING_REFRESH_TOKEN);
         return foundUser;
     }
-    async disconnectUser(userId, refreshToken) { }
     async handleTokenRefresh(existingRefreshToken, refreshTokenSecret, accessTokenSecret, foundUser) {
         const decodedPayload = await (0, helpers_1.verifyJwt)(existingRefreshToken, refreshTokenSecret);
         if (!decodedPayload.email || foundUser.email !== decodedPayload.email) {

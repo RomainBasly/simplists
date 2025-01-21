@@ -52,5 +52,5 @@ export type IBeneficiary = {
 
 export type IUser = {
   userName: string;
-  user_id: string;
+  user_id: `${string}-${string}-${string}-${string}-${string}`;
 };

@@ -9,8 +9,8 @@ require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const common_1 = require("./config/common");
-const protectedRoutes_1 = __importDefault(require("./infrastructure/routes/protectedRoutes"));
 const publicRoutes_1 = __importDefault(require("./infrastructure/routes/publicRoutes"));
+const protectedRoutes_1 = __importDefault(require("./infrastructure/routes/protectedRoutes"));
 const auth_middleware_1 = require("./middlewares/auth-middleware");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 require("./infrastructure/api/app-auth/controller");
@@ -34,3 +34,4 @@ app.use(errors_1.errorHandler);
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+exports.default = app;

@@ -22,6 +22,14 @@ export class AppUserRepository implements IAppUserRepository {
     }
     return data ? data[0] : null;
   }
+  public async getUserNameByUserId(userId: number): Promise<{ user_id: number; userName: string } | null> {
+    const { data, error } = await supabase.from('app-users').select('user_id, userName').eq('user_id', userId);
+    if (error) {
+      throw new Error(`something when wrong in the appUserRepository: ${error.message}`);
+    }
+    return data ? data[0] : null;
+  }
+
   public async getUserIdByEmail(email: string): Promise<any> {
     const { data, error } = await supabase.from('app-users').select('user_id').eq('email', email);
     if (error) {
@@ -40,7 +48,6 @@ export class AppUserRepository implements IAppUserRepository {
 
   public async clearRefreshTokenWithUserId(userId: string) {
     try {
-      console.log('userId inside clear Refresh', userId);
       const { data, error } = await supabase
         .from('app-users')
         .update({ refreshToken: '' })

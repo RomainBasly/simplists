@@ -63,24 +63,14 @@ let AppAuthService = class AppAuthService {
             throw error;
         }
     }
-    async logoutUser(userId, refreshToken) {
+    async logoutUser(userId) {
         try {
-            await this.appUserRepository.clearRefreshTokenWithUserId(userId);
+            const response = await this.appUserRepository.clearRefreshTokenWithUserId(userId);
+            return response;
         }
         catch (error) {
-            try {
-                if (refreshToken) {
-                    await this.appUserRepository.clearRefreshTokenWithRefreshToken(refreshToken);
-                }
-                else {
-                    console.error('something went wrong in the logout service', error);
-                    throw error;
-                }
-            }
-            catch (error) {
-                console.error('something went wrong in the logout service after two attempts', error);
-                throw error;
-            }
+            console.error('something went wrong in the logout service after two attempts', error);
+            throw error;
         }
     }
     // TODO : move to another file

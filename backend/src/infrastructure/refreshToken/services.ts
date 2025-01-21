@@ -26,8 +26,6 @@ export class RefreshTokenService implements IRefreshTokenService {
     return foundUser;
   }
 
-  public async disconnectUser(userId: string, refreshToken: string): Promise<void> {}
-
   public async handleTokenRefresh(
     existingRefreshToken: string,
     refreshTokenSecret: string,

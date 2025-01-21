@@ -27,6 +27,15 @@ let AppUserService = class AppUserService {
             throw error;
         }
     }
+    async getUserByUserId(userId) {
+        try {
+            const user = await this.appUserRepository.getUserNameByUserId(userId);
+            return user;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
 };
 AppUserService = __decorate([
     (0, tsyringe_1.injectable)(),

@@ -7,6 +7,10 @@ import { ListValidatorService } from './validation';
 import { UUID } from 'crypto';
 import { WebSocketClientService } from '../../infrastructure/webSockets/services';
 import { ErrorMessages, ForbiddenError } from '../common/errors';
+import { RedisPubSubService } from '../../infrastructure/gcp-pubsub/services';
+import AppUserService from '../user';
+import { AppNotificationsService } from '../NotificationsManagement/services';
+import { INotificationElement } from '../NotificationsManagement/types';
 
 type User = {
   user_id: number;
@@ -50,16 +54,18 @@ export type IUpdatedEmails = {
 export class ListManagementService {
   public constructor(
     @inject(delay(() => WebSocketClientService)) private readonly webSocketService: WebSocketClientService,
+    @inject(delay(() => RedisPubSubService)) private readonly redisPubSubService: RedisPubSubService,
     @inject(AppListManagementRepository) private readonly appListManagementRepository: AppListManagementRepository,
     @inject(UserInvitationsService) private readonly userInvitationsService: UserInvitationsService,
     @inject(AppUserInvitationsRepository) private readonly appUserInvitationsRepository: AppUserInvitationsRepository,
-    @inject(ListValidatorService) private readonly listValidatorService: ListValidatorService
+    @inject(ListValidatorService) private readonly listValidatorService: ListValidatorService,
+    @inject(AppUserService) private readonly appUserService: AppUserService,
+    @inject(AppNotificationsService) private readonly appNotificationsService: AppNotificationsService
   ) {}
 
   public async createList(inputs: List, creatorUserName: string, creatorEmail: string) {
     try {
       const { emails, description, name, thematic } = inputs;
-      console.log('response from list creation in prod - service', emails, description, name, thematic);
       const createListInputForListCreation = {
         listName: inputs.name,
         access_level: inputs.accessLevel,
@@ -69,7 +75,7 @@ export class ListManagementService {
       };
 
       const dataListCreation = await this.appListManagementRepository.createList(createListInputForListCreation);
-      if (dataListCreation && dataListCreation.id) {
+      if (dataListCreation?.id) {
         await this.appUserInvitationsRepository.addUserToListAsBeneficiary(dataListCreation.id, inputs.creatorId);
       }
 
@@ -95,9 +101,9 @@ export class ListManagementService {
     try {
       const canUserSuppressList = await this.appListManagementRepository.isUserAllowedToSuppressList(listId, userId);
       if (!canUserSuppressList) {
-        throw new ForbiddenError(ErrorMessages.FORBIDDEN_ERROR); // send me an alarm and an error I can send back. Is it the responsability of the service? What does he do?
+        throw new ForbiddenError(ErrorMessages.FORBIDDEN_ERROR);
       }
-      await this.appListManagementRepository.deleteListByListId(listId);
+      await this.appListManagementRepository.deleteListBy(listId);
     } catch (error) {
       throw error;
     }
@@ -113,7 +119,7 @@ export class ListManagementService {
       }
 
       const filteredBeneficiaries = beneficiaries.map((element: any) => {
-        if (element && element['app-lists'] && Array.isArray(element['app-lists'].beneficiaries)) {
+        if (element?.['app-lists'] && Array.isArray(element['app-lists'].beneficiaries)) {
           return {
             ...element,
             'app-lists': {
@@ -125,7 +131,7 @@ export class ListManagementService {
           };
         } else {
           console.error('Unexpected element structure', element);
-          return element; // or handle accordingly
+          return element;
         }
       });
 
@@ -146,7 +152,7 @@ export class ListManagementService {
       }
 
       const filteredBeneficiariesList = list.map((element: any) => {
-        if (element && element['app-lists'] && Array.isArray(element['app-lists'].beneficiaries)) {
+        if (element?.['app-lists'] && Array.isArray(element['app-lists'].beneficiaries)) {
           return {
             ...element,
             'app-lists': {
@@ -193,54 +199,140 @@ export class ListManagementService {
     }
   }
 
-  public async addItemToList(listId: UUID, userId: number, content: string, beneficiaries: IBeneficiary[]) {
+  public async addItemToList(
+    listName: string,
+    listId: UUID,
+    userId: number,
+    content: string,
+    beneficiaries: IBeneficiary[]
+  ) {
     try {
       const inputs = { listId, userId, content };
       await this.listValidatorService.verifyInputAddOrUpdateItem(inputs);
-      // const isAllowed = await this.appListManagementRepository.isUserAllowedToChangeList(listId, userId);
-      // if (isAllowed.length > 0) {
-      const addedItem = await this.appListManagementRepository.addItemToList(listId, content);
-      this.webSocketService.emit('adding-item-to-list-backend', {
-        addedItem,
+      const item = await this.appListManagementRepository.addItemToList(listId, content);
+      const creator = await this.appUserService.getUserByUserId(userId);
+      this.redisPubSubService.publishEvent('add_item', {
+        action: 'add_item',
+        item,
         beneficiaries,
+        userName: creator,
       });
-      return addedItem;
-      // }
+
+      const notificationBody = `${creator?.userName} a ajouté ${content} à la liste ${listName}`;
+      const url = `https://www.simplists.net/lists/user-list/${listId}`;
+
+      const pushNotificationPayload = JSON.stringify({
+        title: "Ajout d'un nouvel item",
+        body: notificationBody,
+        icon: '/images/logos/logo-48x48.png',
+        url,
+      });
+      await this.appNotificationsService.sendMultiplePushNotifications(beneficiaries, pushNotificationPayload);
+
+      const notifications = this.createNotificationContent(
+        beneficiaries,
+        url,
+        'addition',
+        notificationBody,
+        creator?.user_id
+      );
+
+      await this.appNotificationsService.createNotificationsInDB(notifications);
+      return item;
     } catch (error) {
       throw error;
     }
   }
-
-  public async suppressElementById(listId: UUID, userId: number, elementId: string, beneficiaries: IBeneficiary[]) {
+  public async suppressElementById(
+    listName: string,
+    item: string,
+    listId: UUID,
+    userId: number,
+    itemId: string,
+    beneficiaries: IBeneficiary[]
+  ) {
     try {
-      const isAllowed = await this.appListManagementRepository.isUserAllowedToChangeList(listId, userId);
-      // if (isAllowed.length > 0) {
-      const response = await this.appListManagementRepository.suppressItemById(listId, elementId);
-      this.webSocketService.emit('suppress-item-from-list-backend', {
-        elementId,
+      const response = await this.appListManagementRepository.suppressItemById(listId, itemId);
+      const creator = await this.appUserService.getUserByUserId(userId);
+      const itemForPubSub = { id: itemId };
+
+      const notificationBody = `${creator?.userName} a supprimé ${item} de la liste ${listName}`;
+      const url = `https://www.simplists.net/lists/user-list/${listId}`;
+
+      const notifications = this.createNotificationContent(
         beneficiaries,
+        url,
+        'suppression',
+        notificationBody,
+        creator?.user_id
+      );
+
+      this.redisPubSubService.publishEvent('delete_item', {
+        action: 'delete_item',
+        item: itemForPubSub,
+        beneficiaries,
+        userName: creator,
       });
+
+      const pushNotificationPayload = JSON.stringify({
+        title: "Suppression d'un item",
+        body: notificationBody,
+        icon: '/images/logos/logo-48x48.png',
+        url,
+      });
+      await this.appNotificationsService.sendMultiplePushNotifications(beneficiaries, pushNotificationPayload);
+      await this.appNotificationsService.createNotificationsInDB(notifications);
       return response;
-      // }
     } catch (error) {
       throw error;
     }
   }
 
   public async changeItemStatus(
+    listName: string,
     listId: UUID,
     userId: number,
     elementId: string,
+    element: string,
     status: boolean,
     beneficiaries: IBeneficiary[]
   ) {
     try {
-      const updatedItem = await this.appListManagementRepository.changeItemStatus(listId, elementId, status);
-      this.webSocketService.emit('change-item-status-backend', {
-        updatedItem,
+      const item = await this.appListManagementRepository.changeItemStatus(listId, elementId, status);
+
+      const creator = await this.appUserService.getUserByUserId(userId);
+
+      const notificationBody =
+        status === false
+          ? `${creator?.userName} a barré ${element} de la liste ${listName}`
+          : `${creator?.userName} a ajouté ${element} à la liste ${listName}`;
+
+      const url = `https://www.simplists.net/lists/user-list/${listId}`;
+
+      const notifications = this.createNotificationContent(
         beneficiaries,
+        url,
+        'suppression',
+        notificationBody,
+        creator?.user_id
+      );
+      this.redisPubSubService.publishEvent('change_item_status', {
+        action: 'change_item_status',
+        item,
+        beneficiaries,
+        userName: creator,
       });
-      return updatedItem;
+
+      const pushNotificationPayload = JSON.stringify({
+        title: status === false ? 'Un item a été barré' : 'Un item a été ajouté',
+        body: notificationBody,
+        icon: '/images/logos/logo-48x48.png',
+        url: `https://www.simplists.net/lists/user-list/${listId}`,
+      });
+
+      await this.appNotificationsService.sendMultiplePushNotifications(beneficiaries, pushNotificationPayload);
+      await this.appNotificationsService.createNotificationsInDB(notifications);
+      return item;
     } catch (error) {
       throw error;
     }
@@ -256,12 +348,15 @@ export class ListManagementService {
     try {
       const inputs = { listId, userId, content };
       await this.listValidatorService.verifyInputAddOrUpdateItem(inputs);
-      const updatedItem = await this.appListManagementRepository.updateItemContent(listId, elementId, content);
-      this.webSocketService.emit('update-item-content-backend', {
-        updatedItem,
+      const item = await this.appListManagementRepository.updateItemContent(listId, elementId, content);
+      const userName = await this.appUserService.getUserByUserId(userId);
+      this.redisPubSubService.publishEvent('update_item_content', {
+        action: 'update_item_content',
+        item,
         beneficiaries,
+        userName,
       });
-      return updatedItem;
+      return item;
     } catch (error) {
       throw error;
     }
@@ -287,4 +382,26 @@ export class ListManagementService {
       throw error;
     }
   }
+
+  private readonly createNotificationContent = (
+    beneficiaries: IBeneficiary[],
+    url: string,
+    type: string,
+    content: string,
+    creator_id?: number
+  ) => {
+    const notifications = beneficiaries.map((beneficiary: IBeneficiary) => {
+      const element: INotificationElement = {
+        url,
+        content,
+        isNew: true,
+        type,
+        creator_id,
+        recipient_id: beneficiary['app-users'].user_id,
+      };
+      return element;
+    });
+
+    return notifications;
+  };
 }

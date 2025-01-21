@@ -1,6 +1,5 @@
 import { inject, injectable } from 'tsyringe';
 import { Request, Response, NextFunction } from 'express';
-
 import assert from 'assert';
 import UserInvitationsService from '../../../domain/Invitations/services';
 import { TokenService } from '../../jwtToken/services';
