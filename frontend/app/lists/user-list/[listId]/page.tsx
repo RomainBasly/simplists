@@ -5,7 +5,7 @@ import classes from './classes.module.scss'
 
 export default function page() {
   return (
-    <Layout pageType="default">
+    <Layout pageType="list">
       <div className={classes['root']}>
         <ListPage />
       </div>

@@ -17,10 +17,10 @@ export const getSocket = () => {
     });
     // Setup your event listeners here
     socket.on("connect", () => {
-      const accessTokenJWT = Cookies.get("accessToken");
+      const accessToken = Cookies.get("accessToken");
       const socketId = localStorage.getItem("socketId");
-      if (accessTokenJWT) {
-        socket.emit("register-user-id", { socketId, accessTokenJWT });
+      if (accessToken) {
+        socket.emit("register-user-id", { socketId, accessToken });
       }
       console.log("Connected to the socket Server");
     });

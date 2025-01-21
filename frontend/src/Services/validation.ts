@@ -94,7 +94,7 @@ export function validateInputAddItemToList(input: string) {
     errors.itemContent = "Le champ ne peut pas être vide";
   } else if (!isValidRequiredString(input)) {
     errors.itemContent =
-      "Certains caractères ne sont pas autorisés (ex: <, >, ', \", / ou \\)";
+      "<, >, ', \", / ou \\ ne sont pas autorisés";
   }
   return errors;
 }

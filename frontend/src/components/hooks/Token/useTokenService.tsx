@@ -1,3 +1,4 @@
+'use client'
 import StorageService from '@/Services/CookieService'
 import JwtService from '@/Services/jwtService'
 import Cookies from 'js-cookie'

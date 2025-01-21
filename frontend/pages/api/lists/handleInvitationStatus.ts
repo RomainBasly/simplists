@@ -6,9 +6,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const cookieHeader = req.headers.cookie;
-  const listId = req.body.listId;
-  const invitationId = req.body.invitationId;
-  const status = req.body.status;
+  const { listId, invitationId, status } = req.body;
 
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method Not Allowed" });

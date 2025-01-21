@@ -7,13 +7,16 @@
   border-radius: 12px;
 
   @media screen and (max-width: 420px) {
-    max-width: 380px;
+    max-width: 360px;
   }
   @media screen and (max-width: 400px) {
-    max-width: 360px;
+    max-width: 340px;
   }
   @media screen and (max-width: 360px) {
     max-width: 320px;
+  }
+  @media screen and (max-width: 330px) {
+    max-width: 280px;
   }
 
   .content {
