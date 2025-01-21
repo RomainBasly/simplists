@@ -1,4 +1,4 @@
 .env
 /node_modules
-/key-pub-sub.json
+key-pub-sub.json
 .DS_Store
