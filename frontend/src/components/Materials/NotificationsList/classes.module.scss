@@ -1,0 +1,16 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  max-width: 650px;
+  width: 100%;
+  padding-bottom: 20px;
+
+  @media screen and (max-width: 500px) {
+    padding-bottom: 30px;
+  }
+
+  .title {
+    padding-bottom: 10px;
+    text-align: center;
+  }
+}

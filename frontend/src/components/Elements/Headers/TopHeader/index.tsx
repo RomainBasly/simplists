@@ -1,6 +1,6 @@
 'use client'
 import classes from './classes.module.scss'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import NavLink from '@/components/Materials/NavLink'
 import Logo from '@/components/Materials/Logo'
 
@@ -8,7 +8,7 @@ import logo from '/public/images/logos/logo-big-screen.png'
 import logoSmall from '/public/images/logos/logo-256x256.png'
 import {
   ArrowRightOnRectangleIcon,
-  Bars3Icon,
+  BellAlertIcon,
   FlagIcon,
   FolderPlusIcon,
 } from '@heroicons/react/24/solid'
@@ -18,6 +18,10 @@ import classnames from 'classnames'
 import AuthenticationApi from '@/api/BackComponents/AuthenticationApi'
 import Cookies from 'js-cookie'
 import { useUserInfo } from '@/components/providers/user-info-provider'
+import BurgerContainer from '@/components/Materials/BurgerContainer'
+import { getSocket } from '../../Socket'
+import { useInvitationsInfo } from '@/components/providers/invitations-provider'
+import { useNotificationsContext } from '@/components/providers/notifications-provider'
 
 type IProps = {
   className: string
@@ -30,9 +34,15 @@ export default function Header(props: IProps) {
     UserMenuStatus.getInstance().status,
   )
 
+  const { pendingInvitations } = useInvitationsInfo()
+  const { liveNotificationNumber } = useNotificationsContext()
+
+  const invitationsNotifications = pendingInvitations.length
+
   const updateStatus = useCallback((status: EOpeningState) => {
     setUserMenuState(status)
   }, [])
+  const socket = getSocket()
 
   useEffect(() => {
     const removeOnUserMenuStatusChange = UserMenuStatus.getInstance().onChange(
@@ -54,7 +64,6 @@ export default function Header(props: IProps) {
   async function disconnectUser() {
     try {
       const userId = userAttributes.userId
-      console.log('userId disconnection', userId)
       const response = await AuthenticationApi.getInstance().disconnect(userId)
       if (response.status === 'ok') {
         Cookies.remove('accessToken')
@@ -62,6 +71,10 @@ export default function Header(props: IProps) {
         Cookies.remove('userId')
         router.push(response.redirectUrl)
       }
+      const socketId = localStorage.getItem('socketId')
+      socket.emit('unregister-user-id', {
+        socketId,
+      })
     } catch (error) {
       console.log(error)
     }
@@ -84,13 +97,6 @@ export default function Header(props: IProps) {
       />
       <div className={classes['big-screen-nav-links']}>
         <NavLink
-          svg={<FlagIcon />}
-          className={classes['nav-link']}
-          text={'Mes invitations reçues'}
-          alt={'Icône vers la page des invitations'}
-          onClick={() => navigate('/invitations')}
-        />
-        <NavLink
           svg={<FolderPlusIcon />}
           url={'/lists/create-list'}
           className={classes['nav-link']}
@@ -98,6 +104,31 @@ export default function Header(props: IProps) {
           alt={'Icône créer une liste'}
           onClick={() => navigate('/lists/create-list')}
         />
+        <div className={classes['invitations-container']}>
+          <NavLink
+            svg={<FlagIcon />}
+            className={classes['nav-link']}
+            text={'Mes invitations reçues'}
+            alt={'Icône vers la page des invitations'}
+            onClick={() => navigate('/invitations')}
+          />
+
+          <div className={classes['number-container']}>
+            <div className={classes['number']}>{invitationsNotifications}</div>
+          </div>
+        </div>
+        <div className={classes['notifications-container']}>
+          <NavLink
+            svg={<BellAlertIcon />}
+            className={classes['nav-link']}
+            text={'Notifications'}
+            alt={'Icône vers la page des notifications'}
+            onClick={() => navigate('/notifications')}
+          />
+          <div className={classes['number-container']}>
+            <div className={classes['number']}>{liveNotificationNumber}</div>
+          </div>
+        </div>
         {/* TO DO - dev a profile page */}
         {/* <NavLink
           svg={<UserCircleIcon />}
@@ -119,13 +150,13 @@ export default function Header(props: IProps) {
           src={String(logoSmall.src)}
           alt={'Logo'}
           className={classes['logo-mobile']}
-          onclick={redirectAndCloseSideMenu} // nothing happens
+          onclick={redirectAndCloseSideMenu}
           width={50}
           height={50}
         />
-        <Bars3Icon
-          className={classes['burger-icon']}
-          onClick={toggleUserMenu}
+        <BurgerContainer
+          toggleUserMenu={toggleUserMenu}
+          classname={classes['burger']}
         />
       </div>
     </div>

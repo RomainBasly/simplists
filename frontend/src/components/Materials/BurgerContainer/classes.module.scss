@@ -1,0 +1,42 @@
+.root {
+  //   border: 1px solid red;
+  position: relative;
+  height: 40px;
+
+  .burger-icon {
+    margin-right: 30px;
+    height: 100%;
+    color: #2a5293;
+
+    @media screen and (max-width: 500px) {
+      margin-right: 0px;
+    }
+  }
+  .number-container {
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    top: 0px;
+    left: 25px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    border: 1px solid white;
+    z-index: 7;
+    background: #2a5293;
+    color: white;
+
+    @media screen and (max-width: 350px) {
+      width: 15px;
+      height: 15px;
+    }
+    .number {
+      font-size: 10px;
+
+      @media screen and (max-width: 350px) {
+        font-size: 8px;
+      }
+    }
+  }
+}

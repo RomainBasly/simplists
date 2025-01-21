@@ -1,7 +1,7 @@
 import assert from "assert";
 import BaseApiService, { ContentType } from "../BaseAPIService";
 import { BackendError } from "@/Services/errorHandlingService";
-import { IBeneficiary } from "@/components/Materials/UserLists/ListPage";
+import { IBeneficiary } from "../../../../types/types";
 
 export type Cookie = {
   Cookie: string;
@@ -75,6 +75,7 @@ export default class ListsApi extends BaseApiService {
   }
 
   public async addItemToList(
+    listName: string,
     listId: string | string[] | undefined,
     content: string,
     beneficiaries: IBeneficiary[],
@@ -88,7 +89,7 @@ export default class ListsApi extends BaseApiService {
     try {
       return await this.postRequest<any>(
         url,
-        { listId, content, beneficiaries },
+        { listName, listId, content, beneficiaries },
         {
           Cookie: params.Cookie,
         }
@@ -103,6 +104,8 @@ export default class ListsApi extends BaseApiService {
   }
 
   public async suppressItem(
+    listName: string,
+    item: string,
     listId: string | string[] | undefined,
     elementId: string | string[] | undefined,
     beneficiaries: IBeneficiary[],
@@ -112,11 +115,10 @@ export default class ListsApi extends BaseApiService {
     const url = new URL(
       this.baseUrl.concat("/lists").concat(`/suppress-item/`)
     );
-
     try {
       return await this.postRequest<any>(
         url,
-        { listId, elementId, beneficiaries },
+        { listName, item, listId, elementId, beneficiaries },
         { Cookie: params.Cookie }
       );
     } catch (error) {
@@ -138,10 +140,7 @@ export default class ListsApi extends BaseApiService {
     );
 
     try {
-      return await this.deleteRequest<any>(
-        url,
-        { Cookie: params.Cookie }
-      );
+      return await this.deleteRequest<any>(url, { Cookie: params.Cookie });
     } catch (error) {
       if (error instanceof Response) {
         const errorBody: BackendError = await error.json();
@@ -152,8 +151,10 @@ export default class ListsApi extends BaseApiService {
   }
 
   public async handleItemStatusChange(
+    listName: string,
     listId: string | string[] | undefined,
     elementId: string | string[] | undefined,
+    changedElementName: string,
     status: boolean,
     beneficiaries: IBeneficiary[],
     params: any
@@ -166,7 +167,14 @@ export default class ListsApi extends BaseApiService {
     try {
       return await this.postRequest<any>(
         url,
-        { listId, elementId, status, beneficiaries },
+        {
+          listName,
+          listId,
+          elementId,
+          changedElementName,
+          status,
+          beneficiaries,
+        },
         { Cookie: params.Cookie }
       );
     } catch (error) {
@@ -178,6 +186,7 @@ export default class ListsApi extends BaseApiService {
     }
   }
   public async handleItemContentChange(
+    listName: string,
     listId: string | string[] | undefined,
     elementId: string | string[] | undefined,
     contentUpdated: string,
@@ -192,7 +201,7 @@ export default class ListsApi extends BaseApiService {
     try {
       return await this.postRequest<any>(
         url,
-        { listId, elementId, content: contentUpdated, beneficiaries },
+        { listName, listId, elementId, content: contentUpdated, beneficiaries },
         { Cookie: params.Cookie }
       );
     } catch (error) {

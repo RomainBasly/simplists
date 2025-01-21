@@ -2,21 +2,21 @@
   display: flex;
   border: 1px solid grey;
   width: 100%;
-  //max-width: 400px;
   height: 100%;
   padding: 10px;
   border-radius: 12px;
   flex-direction: column;
+  gap: 6px;
 
-  @media screen and (max-width: 420px) {
-    max-width: 380px;
-  }
-  @media screen and (max-width: 400px) {
-    max-width: 360px;
-  }
-  @media screen and (max-width: 360px) {
-    max-width: 320px;
-  }
+  // @media screen and (max-width: 420px) {
+  //   max-width: 360px;
+  // }
+  // @media screen and (max-width: 400px) {
+  //   max-width: 340px;
+  // }
+  // @media screen and (max-width: 360px) {
+  //   max-width: 300px;
+  // }
 
   .header {
     display: flex;
@@ -24,6 +24,10 @@
     justify-content: space-between;
     padding: 0 10px 10px;
     width: 100%;
+
+    @media screen and (max-width: 320px) {
+      padding: 0px;
+    }
 
     .icon {
       display: flex;
@@ -53,6 +57,9 @@
 
     @media screen and (max-width: 460px) {
       font-size: 20px;
+    }
+    @media screen and (max-width: 320px) {
+      font-size: 14px;
     }
   }
 

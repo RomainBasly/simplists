@@ -1,15 +1,14 @@
 'use client'
-import React, { Suspense, useCallback, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import InvitationCard from './InvitationCard'
 import classes from './classes.module.scss'
 import { useRouter } from 'next/navigation'
-// import { useAuthInitialization } from '@/components/hooks/useAuthInitialization'
-// import { useTokenRefresh } from '@/components/hooks/useTokenRefresh'
 import { InformationCircleIcon } from '@heroicons/react/24/outline'
-import { getSocket } from '@/components/Elements/Socket'
-import { useCheckAccessTokenHealth } from '@/components/Utils/checkAccessTokenHealth'
 
-type IInvitation = {
+import { useInvitationsInfo } from '@/components/providers/invitations-provider'
+import { UseCheckAccessTokenHealth } from '@/components/hooks/Token/checkAccessTokenHealth'
+
+export type IInvitation = {
   id: string
   list_id: string
   user_id: number
@@ -26,129 +25,17 @@ type IInvitation = {
 }
 
 export default function UserInvitations() {
-  const [pendingInvitations, setPendingInvitations] = useState<IInvitation[]>(
-    [],
-  )
-  const [refusedInvitations, setRefusedInvitations] = useState<IInvitation[]>(
-    [],
-  )
-  const [loading, setLoading] = useState(true)
+  const {
+    pendingInvitations,
+    refusedInvitations,
+    setPendingInvitations,
+    setRefusedInvitations,
+  } = useInvitationsInfo()
+
+  const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string>('')
-  const socket = getSocket()
-  const { checkToken } = useCheckAccessTokenHealth()
+  const { checkToken } = UseCheckAccessTokenHealth()
   const router = useRouter()
-
-  useEffect(() => {
-    if (socket) {
-      socket.on('list-invitation-socket', (packet: any) => {
-        const newInvitationThroughSocket = {
-          id: packet.data.id as string,
-          list_id: packet.data.listId as string,
-          user_id: packet.data.userId as number,
-          status: packet.data.status as number,
-          'app-lists': {
-            listName: packet.data.listName as string,
-            description: packet.data.listDescription as string,
-            thematic: packet.data.thematic as string,
-          },
-          'app-users': {
-            email: packet.data.creatorEmail as string,
-            userName: packet.data.creatorUserName as string,
-          },
-        }
-
-        const totalInvitations = pendingInvitations.toSpliced(
-          0,
-          0,
-          newInvitationThroughSocket,
-        )
-
-        setPendingInvitations(totalInvitations)
-      })
-
-      return () => {
-        socket.off('list-invitation-socket')
-      }
-    }
-  }, [socket, pendingInvitations])
-
-  const fetchPendingInvitations = useCallback(async () => {
-    try {
-      const token = await checkToken()
-      if (!token) {
-        setLoading(false)
-        router.push('/login')
-        return
-      }
-
-      // This part of the setCookies is essential to propagate the token to the next request I am about to do
-      // TODO : see if we can do it differently later
-      const status = 1
-      const response = await fetch(
-        `/api/lists/getInvitations?status=${status}`,
-        {
-          credentials: 'include',
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch invitations')
-      }
-      const data = await response.json()
-      setPendingInvitations(data)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching invitations:', error)
-      if (error instanceof Error) {
-        setError(error.message)
-      }
-      setLoading(false)
-    }
-  }, [router, checkToken])
-
-  useEffect(() => {
-    fetchPendingInvitations()
-  }, [fetchPendingInvitations])
-
-  const fetchRefusedInvitations = useCallback(async () => {
-    try {
-      const token = await checkToken()
-      if (!token) {
-        setLoading(false)
-        router.push('/login')
-        return
-      }
-
-      // This part of the setCookies is essential to propagate the token to the next request I am about to do
-      // TODO : see if we can do it differently later
-
-      const status = 3
-
-      const response = await fetch(
-        `/api/lists/getInvitations?status=${status}`,
-        {
-          credentials: 'include',
-        },
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch invitations')
-      }
-      const data = await response.json()
-      setRefusedInvitations(data)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching invitations:', error)
-      if (error instanceof Error) {
-        setError(error.message)
-      }
-      setLoading(false)
-    }
-  }, [router, checkToken])
-
-  useEffect(() => {
-    fetchRefusedInvitations()
-  }, [fetchRefusedInvitations])
 
   if (error) return <div>Error: {error}</div>
 
@@ -210,17 +97,54 @@ export default function UserInvitations() {
   return (
     <div className={classes['root']}>
       <div className={classes['pending-invitations-section']}>
-        <h2>Invitations reçues en attente de réponse ({pendingInvitations.length})</h2>
-        <Suspense fallback={'Loading...'}>
-          {pendingInvitations.length === 0 ? (
-            <div className={classes['no-invitation']}>
-              <div className={classes['svg']}>{<InformationCircleIcon />}</div>
-              <div className={classes['text-content']}>
-                Pas de nouvelles invitations
-              </div>
+        <h2 className={classes['title']}>
+          Invitations reçues en attente de réponse ({pendingInvitations.length})
+        </h2>
+        {pendingInvitations.length === 0 ? (
+          <div className={classes['no-invitation']}>
+            <div className={classes['svg']}>{<InformationCircleIcon />}</div>
+            <div className={classes['text-content']}>
+              Pas de nouvelles invitations
             </div>
-          ) : (
-            pendingInvitations.map(async (invitation) => (
+          </div>
+        ) : (
+          pendingInvitations.map((invitation) => (
+            <InvitationCard
+              key={parseInt(invitation.id)}
+              listName={invitation['app-lists'].listName}
+              listId={invitation.list_id}
+              creatorName={invitation['app-users'].userName}
+              description={invitation['app-lists'].description}
+              creatorEmail={invitation['app-users'].email}
+              onAccept={() =>
+                sendInvitationOnStatusChange(
+                  invitation.id,
+                  invitation.list_id,
+                  2,
+                  false,
+                )
+              }
+              thematic={invitation['app-lists'].thematic}
+              onRefuse={() =>
+                sendInvitationOnStatusChange(
+                  invitation.id,
+                  invitation.list_id,
+                  3,
+                  false,
+                )
+              }
+              invitationId={invitation.id}
+            ></InvitationCard>
+          ))
+        )}
+      </div>
+      <div className={classes['refused-invitations-section']}>
+        {refusedInvitations.length > 0 && (
+          <div className={classes['refused-invitations-container']}>
+            <h2 className={classes['title']}>
+              Invitations envoyées et refusées ({refusedInvitations.length})
+            </h2>
+            {refusedInvitations.map(async (invitation) => (
               <InvitationCard
                 key={parseInt(invitation.id)}
                 listName={invitation['app-lists'].listName}
@@ -233,54 +157,17 @@ export default function UserInvitations() {
                     invitation.id,
                     invitation.list_id,
                     2,
-                    false,
+                    true,
                   )
                 }
                 thematic={invitation['app-lists'].thematic}
-                onRefuse={() =>
-                  sendInvitationOnStatusChange(
-                    invitation.id,
-                    invitation.list_id,
-                    3,
-                    false,
-                  )
-                }
                 invitationId={invitation.id}
+                isMasked={true}
+                acceptButtonText={"Changer d'avis et accepter"}
               ></InvitationCard>
-            ))
-          )}
-        </Suspense>
-      </div>
-      <div className={classes['refused-invitations-section']}>
-        <Suspense>
-          {refusedInvitations.length > 0 && (
-            <div className={classes['refused-invitations-container']}>
-              <h2>Invitations envoyées et refusées ({refusedInvitations.length})</h2>
-              {refusedInvitations.map(async (invitation) => (
-                <InvitationCard
-                  key={parseInt(invitation.id)}
-                  listName={invitation['app-lists'].listName}
-                  listId={invitation.list_id}
-                  creatorName={invitation['app-users'].userName}
-                  description={invitation['app-lists'].description}
-                  creatorEmail={invitation['app-users'].email}
-                  onAccept={() =>
-                    sendInvitationOnStatusChange(
-                      invitation.id,
-                      invitation.list_id,
-                      2,
-                      true,
-                    )
-                  }
-                  thematic={invitation['app-lists'].thematic}
-                  invitationId={invitation.id}
-                  isMasked={true}
-                  acceptButtonText={"Changer d'avis et accepter"}
-                ></InvitationCard>
-              ))}
-            </div>
-          )}
-        </Suspense>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

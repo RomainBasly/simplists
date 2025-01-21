@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import StorageService from '@/Services/CookieService'
 import Button from '@/components/Materials/Button'
 import PasswordInput from '../../Inputs/PasswordInput'
+import { getSocket } from '../../Socket'
 
 export type IBody = {
   email: string
@@ -33,16 +34,24 @@ export function LoginForm() {
         return
       }
       const body = { email: lowerCaseEmail, password }
+      const socket = getSocket()
 
       try {
         setIsLoading(true)
         const response = await AuthenticationApi.getInstance().login(body)
+        const accessToken = response.accessToken
         response.accessToken &&
           StorageService.getInstance().setCookies(
             'accessToken',
             response.accessToken,
             true,
           )
+        if (socket) {
+          socket.emit('register-user-id', {
+            socketId: localStorage.getItem('socketId'),
+            accessToken,
+          })
+        }
         response.refreshToken &&
           StorageService.getInstance().setCookies(
             'refreshToken',

@@ -5,9 +5,10 @@ import {
   CreateOrUpdateListForm,
   IListContent,
 } from '../Forms/CreateOrUpdateListForm'
-import { useCheckAccessTokenHealth } from '@/components/Utils/checkAccessTokenHealth'
+
 import LoadingMaterial from '@/components/Materials/LoadingMaterial'
 import classes from './classes.module.scss'
+import { UseCheckAccessTokenHealth } from '@/components/hooks/Token/checkAccessTokenHealth'
 
 export default function CreateOrUpdateFormContainer() {
   const router = useRouter()
@@ -17,7 +18,7 @@ export default function CreateOrUpdateFormContainer() {
   )
   const paramsInitiator = useParams()
   const listId = paramsInitiator?.listId as string
-  const { checkToken } = useCheckAccessTokenHealth()
+  const { checkToken } = UseCheckAccessTokenHealth()
 
   const fetchListDefinition = useCallback(async () => {
     try {
