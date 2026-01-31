@@ -7,3 +7,6 @@ key-pub-sub.json
 *.json
 # (Optionnel) ou un dossier /secrets
 /secrets/
+**/key-pub-sub.json
+**/*service-account*.json
+**/*gcp*.json
