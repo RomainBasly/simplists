@@ -3,3 +3,7 @@
 .DS_Store
 public/.DS_Store
 .env
+key-pub-sub.json
+*.json
+# (Optionnel) ou un dossier /secrets
+/secrets/
